@@ -1,10 +1,9 @@
 #include <iostream>
-#include <genset_whisperpower_ddc/Dummy.hpp>
+#include <genset_whisperpower_ddc/FixedRPMMaster.hpp>
 
 int main(int argc, char** argv)
 {
-    genset_whisperpower_ddc::DummyClass dummyClass;
-    dummyClass.welcome();
+	genset_whisperpower_ddc::FixedRPMMaster fixedRPMMaster;
 
     return 0;
 }
