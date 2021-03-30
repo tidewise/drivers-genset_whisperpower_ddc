@@ -1,5 +1,5 @@
-#ifndef _GENSET_WHISPERPOWER_DDC_FIXED_RPM_HPP_
-#define _GENSET_WHISPERPOWER_DDC_FIXED_RPM_HPP_
+#ifndef _GENSET_WHISPERPOWER_DDC_VARIABLE_SPEED_HPP_
+#define _GENSET_WHISPERPOWER_DDC_VARIABLE_SPEED_HPP_
 
 #include <array>
 
@@ -7,9 +7,9 @@
 
 namespace genset_whisperpower_ddc {
     /**
-     * Implementation of the protocol for fixed RPM gensets –all type (SQ and SC, single, dual, three phase)
+     * Implementation of the protocol for variable speed gensets –all type (SQ and SC, single, dual, three phase)
      */
-    namespace fixed_RPM {
+    namespace variable_speed {
         /** Address for the monitor panel
          */
         static const int TARGET_ADDRESS = 0x0081;

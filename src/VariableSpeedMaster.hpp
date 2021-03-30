@@ -1,12 +1,12 @@
-#ifndef _GENSET_WHISPERPOWER_DDC_FIXED_RPM_MASTER_HPP_
-#define _GENSET_WHISPERPOWER_DDC_FIXED_RPM_MASTER_HPP_
+#ifndef _GENSET_WHISPERPOWER_DDC_VARIABLE_SPEED_MASTER_HPP_
+#define _GENSET_WHISPERPOWER_DDC_VARIABLE_SPEED_MASTER_HPP_
 
 #include <iodrivers_base/Driver.hpp>
 #include <genset_whisperpower_ddc/Frame.hpp>
 #include <iodrivers_base/Driver.hpp>
 
 namespace genset_whisperpower_ddc {
-    class FixedRPMMaster : public iodrivers_base::Driver {
+    class VariableSpeedMaster : public iodrivers_base::Driver {
         /** Genset DDC packet extraction is time-based
          *  This method just throws
          */
@@ -30,7 +30,7 @@ namespace genset_whisperpower_ddc {
         Frame m_frame;
 
         public:
-            FixedRPMMaster();
+            VariableSpeedMaster();
 
             /** Wait for one frame on the bus and read it
              */

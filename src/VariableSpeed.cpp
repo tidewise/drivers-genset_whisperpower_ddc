@@ -1,21 +1,21 @@
-#include <genset_whisperpower_ddc/FixedRPM.hpp>
+#include <genset_whisperpower_ddc/VariableSpeed.hpp>
 #include <cstring>
 
 using namespace std;
 using namespace genset_whisperpower_ddc;
 
-uint8_t* fixed_RPM::formatFrame(uint8_t* buffer, uint16_t targetID, uint16_t sourceID, uint8_t command,
+uint8_t* variable_speed::formatFrame(uint8_t* buffer, uint16_t targetID, uint16_t sourceID, uint8_t command,
                      std::vector<uint8_t> const& payload) {
 
     auto begin = &payload[0];
-    return fixed_RPM::formatFrame(buffer, targetID, sourceID, command, begin, begin + payload.size());
+    return variable_speed::formatFrame(buffer, targetID, sourceID, command, begin, begin + payload.size());
 }
-uint8_t* fixed_RPM::formatFrame(uint8_t* buffer, uint16_t targetID, uint16_t sourceID, uint8_t command,
+uint8_t* variable_speed::formatFrame(uint8_t* buffer, uint16_t targetID, uint16_t sourceID, uint8_t command,
                                 uint8_t const* payloadStart, uint8_t const* payloadEnd) {
 
     int payloadSize = payloadEnd - payloadStart;
     if (payloadSize + FRAME_OVERHEAD_SIZE != SENT_FRAME_SIZE) {
-        throw std::invalid_argument("fixed_RPM::formatFrame: frame size would be different "\
+        throw std::invalid_argument("variable_speed::formatFrame: frame size would be different "\
                                     "from specified size of 16");
     }
 
@@ -33,25 +33,25 @@ uint8_t* fixed_RPM::formatFrame(uint8_t* buffer, uint16_t targetID, uint16_t sou
 
 static void validateBufferSize(uint8_t const* start, uint8_t const* end,
                                char const* context) {
-    if (end - start != fixed_RPM::RECEIVED_FRAME_SIZE) {
-        throw fixed_RPM::WrongSize(
+    if (end - start != variable_speed::RECEIVED_FRAME_SIZE) {
+        throw variable_speed::WrongSize(
             string(context) + ": "
-            "expected " + to_string(fixed_RPM::RECEIVED_FRAME_SIZE) + " bytes, "
+            "expected " + to_string(variable_speed::RECEIVED_FRAME_SIZE) + " bytes, "
             "but got " + to_string(end - start)
         );
     }
 }
 
-Frame fixed_RPM::parseFrame(uint8_t const* start, uint8_t const* end) {
+Frame variable_speed::parseFrame(uint8_t const* start, uint8_t const* end) {
     Frame result;
     parseFrame(result, start, end);
     return result;
 }
 
-void fixed_RPM::parseFrame(Frame& frame, uint8_t const* start, uint8_t const* end) {
-    validateBufferSize(start, end, "fixed_RPM::parseFrame");
+void variable_speed::parseFrame(Frame& frame, uint8_t const* start, uint8_t const* end) {
+    validateBufferSize(start, end, "variable_speed::parseFrame");
     if (!isChecksumValid(start, end)) {
-        throw InvalidChecksum("fixed_RPM::parseFrame: checksum failed");
+        throw InvalidChecksum("variable_speed::parseFrame: checksum failed");
     }
 
     uint16_t lsbTargetID = start[0];
@@ -66,13 +66,13 @@ void fixed_RPM::parseFrame(Frame& frame, uint8_t const* start, uint8_t const* en
 }
 
 
-bool fixed_RPM::isChecksumValid(uint8_t const* start, uint8_t const* end) {
-    validateBufferSize(start, end, "fixed_RPM::isChecksumValid");
+bool variable_speed::isChecksumValid(uint8_t const* start, uint8_t const* end) {
+    validateBufferSize(start, end, "variable_speed::isChecksumValid");
     uint8_t expected = checksum(start, end - 1);
     return (end[-1] == expected);
 }
 
-uint8_t fixed_RPM::checksum(uint8_t const* start, uint8_t const* end) {
+uint8_t variable_speed::checksum(uint8_t const* start, uint8_t const* end) {
     uint16_t checksum = 0;
     for (uint8_t const* it = start; it != end; ++it) {
         checksum += (uint16_t)*it;
