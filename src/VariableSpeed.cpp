@@ -114,3 +114,30 @@ std::vector<uint8_t> formatCommand14Data(uint8_t totalMinutes, uint32_t totalHou
 
     return payload;
 }
+
+uint8_t getStatusByteA(bool overallAlarm, bool engineTempAlarm, bool pmVoltageAlarm, bool oilPressAlarm,
+                       bool exhaustTempAlarm, bool uac1Alarm, bool iac1Alarm, bool oilPressHighAlarm){
+    return getStatusByte(overallAlarm, engineTempAlarm, pmVoltageAlarm, oilPressAlarm, 
+                         exhaustTempAlarm, uac1Alarm, iac1Alarm, oilPressHighAlarm);
+}
+
+uint8_t getStatusByteB(bool lowStartBatteryVoltAlarm, bool startFailure, bool runSignal, bool startByOpUnit){
+    return getStatusByte(false, false, lowStartBatteryVoltAlarm, false, startFailure, runSignal, false, startByOpUnit);
+}
+
+uint8_t getStatusByteC(bool mdlDetection50Hz, bool mdlDetection60Hz, bool mdlDetection3Phase, bool mobileMdlDetection){
+    return getStatusByte(false, false, mdlDetection50Hz, mdlDetection60Hz, mdlDetection3Phase, mobileMdlDetection, false, false);
+}
+
+uint8_t getStatusByte(bool bit0, bool bit1, bool bit2, bool bit3, bool bit4, bool bit5, bool bit6, bool bit7){
+    std::bitset<8> status;
+    status.set(0, bit0);
+    status.set(1, bit1);
+    status.set(2, bit2);
+    status.set(3, bit3);
+    status.set(4, bit4);
+    status.set(5, bit5);
+    status.set(6, bit6);
+    status.set(7, bit7);
+    return (status.to_ulong & 0xFF);
+}

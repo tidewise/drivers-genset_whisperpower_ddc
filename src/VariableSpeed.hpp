@@ -109,6 +109,42 @@ namespace genset_whisperpower_ddc {
             uint8_t totalMinutes, uint32_t totalHours,
             uint8_t historicalMinutes, uint32_t historicalHours
         );
+
+        /** Convert a set of bits into a byte that can be passed to Command02 as the status(A-C) arguments
+         */
+        uint8_t getStatusByte(bool bit0, bool bit1, bool bit2, bool bit3, bool bit4, bool bit5, bool bit6, bool bit7);
+
+        /** Call getStatusByte, passing the specific Status(A) variables as bits
+         * 
+         * @arg Overall alarm
+         * @arg Engine temperature alarm
+         * @arg PM voltage alarm
+         * @arg Oil pressure alarm
+         * @arg Exhaust temperature alarm
+         * @arg Uac1 alarm
+         * @arg Iac1 alarm
+         * @arg Oil pressure high alarm
+         */
+        uint8_t getStatusByteA(bool overallAlarm, bool engineTempAlarm, bool pmVoltageAlarm, bool oilPressAlarm,
+                       bool exhaustTempAlarm, bool uac1Alarm, bool iac1Alarm, bool oilPressHighAlarm);
+
+        /** Call getStatusByte, passing the specific Status(B) variables as bits or setting the bit false if it is not used
+         * 
+         * @arg Low start battery voltage alarm
+         * @arg Start failure
+         * @arg Run signal
+         * @arg Start by Operation unit
+         */
+        uint8_t getStatusByteB(bool lowStartBatteryVoltAlarm, bool startFailure, bool runSignal, bool startByOpUnit);
+
+        /** Call getStatusByte, passing the specific Status(C) variables as bits or setting the bit false if it is not used
+         * 
+         * @arg 50Hz model detection
+         * @arg 60Hz model detection
+         * @arg 3 phase model detection
+         * @arg Mobile model detection
+         */
+        uint8_t getStatusByteC(bool mdlDetection50Hz, bool mdlDetection60Hz, bool mdlDetection3Phase, bool mobileMdlDetection);
     }
 
 }
