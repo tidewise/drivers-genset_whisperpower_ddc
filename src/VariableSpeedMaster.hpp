@@ -13,9 +13,9 @@ namespace genset_whisperpower_ddc {
         int extractPacket(uint8_t const* buffer, size_t bufferSize) const;
 
         /*
-         * The DDC power print sends every 300ms data information for the panels
+         *  
          */
-        base::Time m_interframe_delay = base::Time::fromMilliseconds(300);
+        base::Time m_interframe_delay = base::Time::fromMilliseconds(250); 
 
         /** Internal read buffer */
         std::vector<uint8_t> m_read_buffer;

@@ -7,7 +7,7 @@
 
 namespace genset_whisperpower_ddc {
     /**
-     * Implementation of the protocol for variable speed gensets –all type (SQ and SC, single, dual, three phase)
+     * Implementation of the protocol for variable speed gensets –GV-4 (230V/50Hz)
      */
     namespace variable_speed {
         /** Address for the monitor panel
@@ -16,7 +16,7 @@ namespace genset_whisperpower_ddc {
         
         /** Address for the DDC power controller
          */
-        static const int SOURCE_ADDRESS = 0x0080;
+        static const int SOURCE_ADDRESS = 0x0088;
 
         /** Maximum total frame size
          */
