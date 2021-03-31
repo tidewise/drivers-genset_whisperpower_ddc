@@ -79,3 +79,38 @@ uint8_t variable_speed::checksum(uint8_t const* start, uint8_t const* end) {
     }
     return (uint8_t) (checksum & 0xFF); // get lowest byte
 }
+
+std::vector<uint8_t> formatCommand02Data(uint16_t rpm, uint16_t udcStartBattery, uint8_t statusA,
+                                     uint8_t statusB, uint8_t statusC, uint8_t generatorStatus,
+                                     uint8_t generatorType) {
+    std::vector<uint8_t> payload;
+    payload.push_back(rpm & 0xFF);
+    payload.push_back((rpm >> 8) & 0xFF);
+    payload.push_back(udcStartBattery & 0xFF);
+    payload.push_back((udcStartBattery >> 8) & 0xFF);
+    payload.push_back(statusA);
+    payload.push_back(statusB);
+    payload.push_back(statusC);
+    payload.push_back(generatorStatus);
+    payload.push_back(generatorType);
+    payload.push_back(0x00); // byte not used
+
+    return payload;
+}
+
+std::vector<uint8_t> formatCommand14Data(uint8_t totalMinutes, uint32_t totalHours,
+                                         uint8_t historicalMinutes, uint32_t historicalHours) {
+    std::vector<uint8_t> payload;
+    payload.push_back(totalMinutes);
+    payload.push_back(totalHours & 0xFF);
+    payload.push_back((totalHours >> 8) & 0xFF);
+    payload.push_back((totalHours >> 16) & 0xFF);
+    payload.push_back(historicalMinutes);
+    payload.push_back(historicalHours & 0xFF);
+    payload.push_back((historicalHours >> 8) & 0xFF);
+    payload.push_back((historicalHours >> 16) & 0xFF);
+    payload.push_back(0x00); // byte not used
+    payload.push_back(0x00); // byte not used
+
+    return payload;
+}

@@ -45,6 +45,34 @@ namespace genset_whisperpower_ddc {
              * Does not wait for the turnaround delay
              */
             void writeFrame(uint8_t command, std::vector<uint8_t> const& payload);
+
+            /** Send a command 02 frame
+             * 
+             * @arg RPM
+             * @arg Udc start battery: value x 0.01 V
+             * @arg Status bits (A)
+             * @arg Status bits (B)
+             * @arg Status bits (C)
+             * @arg Generator status
+             * @arg Generator type
+             */
+            void VariableSpeedMaster::Command02(
+                uint16_t rpm, uint16_t udcStartBattery, uint8_t statusA,
+                uint8_t statusB, uint8_t statusC, uint8_t generatorStatus,
+                uint8_t generatorType
+            );
+
+            /** Send a command 14 frame
+             * 
+             * @arg Total run time to be reset after maintenance (Minutes)
+             * @arg Total run time to be reset after maintenance (Hours)
+             * @arg Historical run time (Minutes)
+             * @arg Historical run time (Hours)
+             */
+            void VariableSpeedMaster::Command14(
+                uint8_t totalMinutes, uint32_t totalHours,
+                uint8_t historicalMinutes, uint32_t historicalHours
+            );
     };
 
 }

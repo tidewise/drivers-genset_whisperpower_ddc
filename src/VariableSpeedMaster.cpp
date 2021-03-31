@@ -35,3 +35,24 @@ void VariableSpeedMaster::writeFrame(uint8_t command, std::vector<uint8_t> const
     uint8_t const* end = variable_speed::formatFrame(start, variable_speed::TARGET_ADDRESS, variable_speed::SOURCE_ADDRESS, command, payload);
     writePacket(&m_write_buffer[0], end - start);
 }
+
+void VariableSpeedMaster::Command02(uint16_t rpm, uint16_t udcStartBattery, uint8_t statusA,
+                                    uint8_t statusB, uint8_t statusC, uint8_t generatorStatus,
+                                    uint8_t generatorType) {
+    uint8_t* buffer_start = &m_write_buffer[0];
+    std::vector<uint8_t> payload = formatCommand02Data(rpm, udcStartBattery, statusA, statusB, statusC, generatorStatus, generatorType);
+    uint8_t const* buffer_end = variable_speed::formatFrame(
+        buffer_start, variable_speed::TARGET_ADDRESS, variable_speed::SOURCE_ADDRESS, 0x02, payload);
+    );
+    writePacket(buffer_start, buffer_end - buffer_start);
+}
+
+void VariableSpeedMaster::Command14(uint8_t totalMinutes, uint32_t totalHours,
+                                    uint8_t historicalMinutes, uint32_t historicalHours) {
+    uint8_t* buffer_start = &m_write_buffer[0];
+    std::vector<uint8_t> payload = formatCommand14Data(totalMinutes, totalHours, historicalMinutes, historicalHours);
+    uint8_t const* buffer_end = variable_speed::formatFrame(
+        buffer_start, variable_speed::TARGET_ADDRESS, variable_speed::SOURCE_ADDRESS, 0x0E, payload);
+    );
+    writePacket(buffer_start, buffer_end - buffer_start);
+}

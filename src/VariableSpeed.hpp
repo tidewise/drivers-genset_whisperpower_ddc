@@ -81,6 +81,34 @@ namespace genset_whisperpower_ddc {
         /** Validates the checksum contained at the end of the frame
          */
         bool isChecksumValid(uint8_t const* start, uint8_t const* end);
+
+        /** Format payload for command 02
+         * 
+         * @arg RPM
+         * @arg Udc start battery: value x 0.01 V
+         * @arg Status bits (A)
+         * @arg Status bits (B)
+         * @arg Status bits (C)
+         * @arg Generator status
+         * @arg Generator type
+         */
+        std::vector<uint8_t> formatCommand02Data(
+            uint16_t rpm, uint16_t udcStartBattery, uint8_t statusA,
+            uint8_t statusB, uint8_t statusC, uint8_t generatorStatus,
+            uint8_t generatorType
+        );
+
+        /** Format payload for command 14
+         * 
+         * @arg Total run time to be reset after maintenance (Minutes)
+         * @arg Total run time to be reset after maintenance (Hours)
+         * @arg Historical run time (Minutes)
+         * @arg Historical run time (Hours)
+         */
+        std::vector<uint8_t> formatCommand14Data(
+            uint8_t totalMinutes, uint32_t totalHours,
+            uint8_t historicalMinutes, uint32_t historicalHours
+        );
     }
 
 }
