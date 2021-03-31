@@ -1,5 +1,6 @@
 #include <genset_whisperpower_ddc/VariableSpeed.hpp>
 #include <cstring>
+#include <bits/stdc++.h>
 
 using namespace std;
 using namespace genset_whisperpower_ddc;
@@ -80,7 +81,7 @@ uint8_t variable_speed::checksum(uint8_t const* start, uint8_t const* end) {
     return (uint8_t) (checksum & 0xFF); // get lowest byte
 }
 
-std::vector<uint8_t> formatCommand02Data(uint16_t rpm, uint16_t udcStartBattery, uint8_t statusA,
+std::vector<uint8_t> variable_speed::formatCommand02Data(uint16_t rpm, uint16_t udcStartBattery, uint8_t statusA,
                                      uint8_t statusB, uint8_t statusC, uint8_t generatorStatus,
                                      uint8_t generatorType) {
     std::vector<uint8_t> payload;
@@ -98,7 +99,7 @@ std::vector<uint8_t> formatCommand02Data(uint16_t rpm, uint16_t udcStartBattery,
     return payload;
 }
 
-std::vector<uint8_t> formatCommand14Data(uint8_t totalMinutes, uint32_t totalHours,
+std::vector<uint8_t> variable_speed::formatCommand14Data(uint8_t totalMinutes, uint32_t totalHours,
                                          uint8_t historicalMinutes, uint32_t historicalHours) {
     std::vector<uint8_t> payload;
     payload.push_back(totalMinutes);
@@ -115,21 +116,21 @@ std::vector<uint8_t> formatCommand14Data(uint8_t totalMinutes, uint32_t totalHou
     return payload;
 }
 
-uint8_t getStatusByteA(bool overallAlarm, bool engineTempAlarm, bool pmVoltageAlarm, bool oilPressAlarm,
+uint8_t variable_speed::getStatusByteA(bool overallAlarm, bool engineTempAlarm, bool pmVoltageAlarm, bool oilPressAlarm,
                        bool exhaustTempAlarm, bool uac1Alarm, bool iac1Alarm, bool oilPressHighAlarm){
     return getStatusByte(overallAlarm, engineTempAlarm, pmVoltageAlarm, oilPressAlarm, 
                          exhaustTempAlarm, uac1Alarm, iac1Alarm, oilPressHighAlarm);
 }
 
-uint8_t getStatusByteB(bool lowStartBatteryVoltAlarm, bool startFailure, bool runSignal, bool startByOpUnit){
+uint8_t variable_speed::getStatusByteB(bool lowStartBatteryVoltAlarm, bool startFailure, bool runSignal, bool startByOpUnit){
     return getStatusByte(false, false, lowStartBatteryVoltAlarm, false, startFailure, runSignal, false, startByOpUnit);
 }
 
-uint8_t getStatusByteC(bool mdlDetection50Hz, bool mdlDetection60Hz, bool mdlDetection3Phase, bool mobileMdlDetection){
+uint8_t variable_speed::getStatusByteC(bool mdlDetection50Hz, bool mdlDetection60Hz, bool mdlDetection3Phase, bool mobileMdlDetection){
     return getStatusByte(false, false, mdlDetection50Hz, mdlDetection60Hz, mdlDetection3Phase, mobileMdlDetection, false, false);
 }
 
-uint8_t getStatusByte(bool bit0, bool bit1, bool bit2, bool bit3, bool bit4, bool bit5, bool bit6, bool bit7){
+uint8_t variable_speed::getStatusByte(bool bit0, bool bit1, bool bit2, bool bit3, bool bit4, bool bit5, bool bit6, bool bit7){
     std::bitset<8> status;
     status.set(0, bit0);
     status.set(1, bit1);
@@ -139,5 +140,5 @@ uint8_t getStatusByte(bool bit0, bool bit1, bool bit2, bool bit3, bool bit4, boo
     status.set(5, bit5);
     status.set(6, bit6);
     status.set(7, bit7);
-    return (status.to_ulong & 0xFF);
+    return (status.to_ulong() & 0xFF);
 }

@@ -56,7 +56,7 @@ namespace genset_whisperpower_ddc {
              * @arg Generator status
              * @arg Generator type
              */
-            void VariableSpeedMaster::Command02(
+            void Command02(
                 uint16_t rpm, uint16_t udcStartBattery, uint8_t statusA,
                 uint8_t statusB, uint8_t statusC, uint8_t generatorStatus,
                 uint8_t generatorType
@@ -69,7 +69,7 @@ namespace genset_whisperpower_ddc {
              * @arg Historical run time (Minutes)
              * @arg Historical run time (Hours)
              */
-            void VariableSpeedMaster::Command14(
+            void Command14(
                 uint8_t totalMinutes, uint32_t totalHours,
                 uint8_t historicalMinutes, uint32_t historicalHours
             );
