@@ -27,10 +27,10 @@ TEST_F(VariableSpeedTest, it_formats_a_frame) {
 
     /** checksum: 
      * variable_speed::TARGET_ADDRESS = 0x0081
-     * variable_speed::SOURCE_ADDRESS = 0x0080
+     * variable_speed::SOURCE_ADDRESS = 0x0088
      * command: 0x01
      * 0+1+2+3+4+5+6+7+8+9 = 45 = 0b101101 = 0x2D
-     * checksum = LSB(0x81 + 0x00 + 0x80 + 0x00 + 0x01 + 0x2D) = LSB(0x137) = 0x37
+     * checksum = LSB(0x81 + 0x00 + 0x88 + 0x00 + 0x01 + 0x2D) = LSB(0x137) = 0x37
      */
     uint8_t expected[] = { variable_speed::TARGET_ADDRESS & 0xFF, (variable_speed::TARGET_ADDRESS >> 8) & 0xFF, variable_speed::SOURCE_ADDRESS & 0xFF,
                            (variable_speed::SOURCE_ADDRESS >> 8) & 0xFF, 0x01, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0x37 };
