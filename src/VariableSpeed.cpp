@@ -76,9 +76,9 @@ bool variable_speed::isChecksumValid(uint8_t const* start, uint8_t const* end) {
 uint8_t variable_speed::checksum(uint8_t const* start, uint8_t const* end) {
     uint16_t checksum = 0;
     for (uint8_t const* it = start; it != end; ++it) {
-        checksum += (uint16_t)*it;
+        checksum += (uint16_t) *it;
     }
-    return (uint8_t) (checksum & 0xFF); // get lowest byte
+    return (checksum & 0xFF); // get lowest byte
 }
 
 std::vector<uint8_t> variable_speed::formatCommand02Data(uint16_t rpm, uint16_t udcStartBattery, uint8_t statusA,
