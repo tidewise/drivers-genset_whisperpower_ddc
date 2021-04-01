@@ -1,9 +1,92 @@
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
 #include <genset_whisperpower_ddc/VariableSpeedMaster.hpp>
+#include <genset_whisperpower_ddc/VariableSpeed.hpp>
+#include <iodrivers_base/FixtureGTest.hpp>
+#include <fcntl.h>
+#include <thread>
 
+using namespace std;
 using namespace genset_whisperpower_ddc;
+using testing::ElementsAreArray;
+using base::Time;
 
-BOOST_AUTO_TEST_CASE(it_should_not_crash_when_welcome_is_called)
-{
-    genset_whisperpower_ddc::VariableSpeedMaster variableSpeedMaster;
+/*using namespace std;
+using testing::ElementsAreArray;
+using base::Time;
+using namespace modbus;*/
+
+struct VariableSpeedMasterTest : public ::testing::Test, iodrivers_base::Fixture<VariableSpeedMaster> {
+    int pipeTX = -1;
+
+    VariableSpeedMasterTest() {
+    }
+
+    ~VariableSpeedMasterTest() {
+        if (pipeTX != -1) {
+            close(pipeTX);
+        }
+    }
+
+    void openPipe() {
+        int pipes[2];
+        ASSERT_EQ(pipe(pipes), 0);
+        int rx = pipes[0];
+        int tx = pipes[1];
+
+        long fd_flags = fcntl(rx, F_GETFL);
+        fcntl(rx, F_SETFL, fd_flags | O_NONBLOCK);
+
+        driver.setFileDescriptor(rx, true);
+        pipeTX = tx;
+    }
+
+    void writeToPipe(uint8_t const* bytes, int size) {
+        ASSERT_EQ(write(pipeTX, bytes, size), 1);
+    }
+};
+
+TEST_F(VariableSpeedMasterTest, it_throws_if_calling_readPacket) {
+    driver.openURI("test://");
+    // push one byte to get into extractPacket
+    uint8_t buffer[1];
+    pushDataToDriver(buffer, buffer + 1);
+    ASSERT_THROW(driver.readPacket(buffer, 1024), std::logic_error);
+}
+
+TEST_F(VariableSpeedMasterTest, it_writes_a_frame) {
+    driver.openURI("test://");
+
+    driver.writeFrame(0x02, std::vector<uint8_t> {0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
+    auto bytes = readDataFromDriver();
+
+    uint8_t expected[] = { variable_speed::TARGET_ADDRESS & 0xFF, (variable_speed::TARGET_ADDRESS >> 8) & 0xFF, variable_speed::SOURCE_ADDRESS & 0xFF,
+                           (variable_speed::SOURCE_ADDRESS >> 8) & 0xFF, 0x02, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0x38 };
+    ASSERT_THAT(bytes, ElementsAreArray(expected));
+}
+
+TEST_F(VariableSpeedMasterTest, it_sends_command02) {
+    driver.openURI("test://");
+
+    uint8_t statusA = variable_speed::getStatusByteA(true, false, true, false, true, false, true, false); // 0b01010101 = 0x55
+    uint8_t statusB = variable_speed::getStatusByteB(false, true, false, true); // 0b10010000 = 0x90
+    uint8_t statusC = variable_speed::getStatusByteC(true, false, true, false); // 0b00010100 = 0x14
+
+    driver.sendCommand02(0x4A38, 0x00E6, statusA, statusB, statusC, 0x01, 0x04);
+    auto bytes = readDataFromDriver();
+
+    uint8_t expected[] = { variable_speed::TARGET_ADDRESS & 0xFF, (variable_speed::TARGET_ADDRESS >> 8) & 0xFF, variable_speed::SOURCE_ADDRESS & 0xFF,
+                           (variable_speed::SOURCE_ADDRESS >> 8) & 0xFF, 0x02, 0x38, 0x4A, 0xE6, 0x00, statusA, statusB, statusC, 0x01, 0x04, 0x00, 0x71 };
+    ASSERT_THAT(bytes, ElementsAreArray(expected));
+}
+
+TEST_F(VariableSpeedMasterTest, it_sends_command14) {
+    driver.openURI("test://");
+
+    driver.sendCommand14(0x1E, 0x000186A0, 0x0F, 0x00011170);
+    auto bytes = readDataFromDriver();
+
+    uint8_t expected[] = { variable_speed::TARGET_ADDRESS & 0xFF, (variable_speed::TARGET_ADDRESS >> 8) & 0xFF, variable_speed::SOURCE_ADDRESS & 0xFF,
+                           (variable_speed::SOURCE_ADDRESS >> 8) & 0xFF, 0x0E, 0x1E, 0xA0, 0x86, 0x01, 0x0F, 0x70, 0x11, 0x01, 0x00, 0x00, 0xED };
+    ASSERT_THAT(bytes, ElementsAreArray(expected));
 }
