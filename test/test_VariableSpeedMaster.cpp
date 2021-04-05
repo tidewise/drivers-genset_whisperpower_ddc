@@ -11,11 +11,6 @@ using namespace genset_whisperpower_ddc;
 using testing::ElementsAreArray;
 using base::Time;
 
-/*using namespace std;
-using testing::ElementsAreArray;
-using base::Time;
-using namespace modbus;*/
-
 struct VariableSpeedMasterTest : public ::testing::Test, iodrivers_base::Fixture<VariableSpeedMaster> {
     int pipeTX = -1;
 
@@ -54,6 +49,28 @@ TEST_F(VariableSpeedMasterTest, it_throws_if_calling_readPacket) {
     ASSERT_THROW(driver.readPacket(buffer, 1024), std::logic_error);
 }
 
+TEST_F(VariableSpeedMasterTest, it_reads_a_frame) {
+    openPipe();
+
+    uint8_t bytes[] = { variable_speed::TARGET_ADDRESS & 0xFF, (variable_speed::TARGET_ADDRESS >> 8) & 0xFF, variable_speed::SOURCE_ADDRESS & 0xFF,
+                           (variable_speed::SOURCE_ADDRESS >> 8) & 0xFF, 0x02, 0, 1, 2, 3, 0x11 };
+    thread writeThread([this,&bytes]{
+        for (uint8_t i = 0; i < 10; ++i) {
+            writeToPipe(bytes + i, 1);
+            usleep(1000);
+        }
+    });
+
+    Frame frame = driver.readFrame();
+    ASSERT_EQ(variable_speed::TARGET_ADDRESS, frame.targetID);
+    ASSERT_EQ(variable_speed::SOURCE_ADDRESS, frame.sourceID);
+    ASSERT_EQ(0x02, frame.command);
+    uint8_t payload[4] = { 0, 1, 2, 3 };
+    ASSERT_THAT(frame.payload, ElementsAreArray(payload));
+
+    writeThread.join();
+}
+
 TEST_F(VariableSpeedMasterTest, it_writes_a_frame) {
     driver.openURI("test://");
 
@@ -65,7 +82,7 @@ TEST_F(VariableSpeedMasterTest, it_writes_a_frame) {
     ASSERT_THAT(bytes, ElementsAreArray(expected));
 }
 
-TEST_F(VariableSpeedMasterTest, it_sends_command02) {
+TEST_F(VariableSpeedMasterTest, it_sends_command_02) {
     driver.openURI("test://");
 
     uint8_t statusA = variable_speed::getStatusByteA(true, false, true, false, true, false, true, false); // 0b01010101 = 0x55
@@ -80,7 +97,7 @@ TEST_F(VariableSpeedMasterTest, it_sends_command02) {
     ASSERT_THAT(bytes, ElementsAreArray(expected));
 }
 
-TEST_F(VariableSpeedMasterTest, it_sends_command14) {
+TEST_F(VariableSpeedMasterTest, it_sends_command_14) {
     driver.openURI("test://");
 
     driver.sendCommand14(0x1E, 0x000186A0, 0x0F, 0x00011170);
