@@ -17,7 +17,7 @@ uint8_t* variable_speed::formatFrame(uint8_t* buffer, uint16_t targetID, uint16_
     int payloadSize = payloadEnd - payloadStart;
     if (payloadSize + FRAME_OVERHEAD_SIZE != SENT_FRAME_SIZE) {
         throw std::invalid_argument("variable_speed::formatFrame: frame size would be different "\
-                                    "from specified size of 16");
+                                    "from specified size of 10");
     }
 
     buffer[0] = targetID & 0xFF;
@@ -79,6 +79,16 @@ uint8_t variable_speed::checksum(uint8_t const* start, uint8_t const* end) {
         checksum += (uint16_t) *it;
     }
     return (checksum & 0xFF); // get lowest byte
+}
+
+std::vector<uint8_t> variable_speed::formatCommandF7Data(uint8_t controlCommand) {
+    std::vector<uint8_t> payload;
+    payload.push_back(controlCommand);
+    payload.push_back(0x00); // byte not used
+    payload.push_back(0x00); // byte not used
+    payload.push_back(0x00); // byte not used
+
+    return payload;
 }
 
 std::vector<uint8_t> variable_speed::formatCommand02Data(uint16_t rpm, uint16_t udcStartBattery, uint8_t statusA,

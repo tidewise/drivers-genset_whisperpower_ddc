@@ -53,9 +53,9 @@ TEST_F(VariableSpeedMasterTest, it_reads_a_frame) {
     openPipe();
 
     uint8_t bytes[] = { variable_speed::TARGET_ADDRESS & 0xFF, (variable_speed::TARGET_ADDRESS >> 8) & 0xFF, variable_speed::SOURCE_ADDRESS & 0xFF,
-                           (variable_speed::SOURCE_ADDRESS >> 8) & 0xFF, 0x02, 0, 1, 2, 3, 0x11 };
+                           (variable_speed::SOURCE_ADDRESS >> 8) & 0xFF, 0x02, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0x38 };
     thread writeThread([this,&bytes]{
-        for (uint8_t i = 0; i < 10; ++i) {
+        for (uint8_t i = 0; i < 16; ++i) {
             writeToPipe(bytes + i, 1);
             usleep(1000);
         }
@@ -65,7 +65,7 @@ TEST_F(VariableSpeedMasterTest, it_reads_a_frame) {
     ASSERT_EQ(variable_speed::TARGET_ADDRESS, frame.targetID);
     ASSERT_EQ(variable_speed::SOURCE_ADDRESS, frame.sourceID);
     ASSERT_EQ(0x02, frame.command);
-    uint8_t payload[4] = { 0, 1, 2, 3 };
+    uint8_t payload[10] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
     ASSERT_THAT(frame.payload, ElementsAreArray(payload));
 
     writeThread.join();
@@ -74,14 +74,27 @@ TEST_F(VariableSpeedMasterTest, it_reads_a_frame) {
 TEST_F(VariableSpeedMasterTest, it_writes_a_frame) {
     driver.openURI("test://");
 
-    driver.writeFrame(0x02, std::vector<uint8_t> {0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
+    driver.writeFrame(0xF7, std::vector<uint8_t> {0, 1, 2, 3});
     auto bytes = readDataFromDriver();
 
     uint8_t expected[] = { variable_speed::TARGET_ADDRESS & 0xFF, (variable_speed::TARGET_ADDRESS >> 8) & 0xFF, variable_speed::SOURCE_ADDRESS & 0xFF,
-                           (variable_speed::SOURCE_ADDRESS >> 8) & 0xFF, 0x02, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0x38 };
+                           (variable_speed::SOURCE_ADDRESS >> 8) & 0xFF, 0xF7, 0x00, 0x01, 0x02, 0x03, 0x06 };
     ASSERT_THAT(bytes, ElementsAreArray(expected));
 }
 
+
+TEST_F(VariableSpeedMasterTest, it_sends_command_F7) {
+    driver.openURI("test://");
+    
+    driver.sendCommandF7(0x02);
+    auto bytes = readDataFromDriver();
+
+    uint8_t expected[] = { variable_speed::TARGET_ADDRESS & 0xFF, (variable_speed::TARGET_ADDRESS >> 8) & 0xFF, variable_speed::SOURCE_ADDRESS & 0xFF,
+                           (variable_speed::SOURCE_ADDRESS >> 8) & 0xFF, 0xF7, 0x02, 0x00, 0x00, 0x00, 0x02 };
+     ASSERT_THAT(bytes, ElementsAreArray(expected));
+}
+
+/*
 TEST_F(VariableSpeedMasterTest, it_sends_command_02) {
     driver.openURI("test://");
 
@@ -107,3 +120,4 @@ TEST_F(VariableSpeedMasterTest, it_sends_command_14) {
                            (variable_speed::SOURCE_ADDRESS >> 8) & 0xFF, 0x0E, 0x1E, 0xA0, 0x86, 0x01, 0x0F, 0x70, 0x11, 0x01, 0x00, 0x00, 0xED };
     ASSERT_THAT(bytes, ElementsAreArray(expected));
 }
+*/

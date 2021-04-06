@@ -48,3 +48,8 @@ void VariableSpeedMaster::sendCommand14(uint8_t totalMinutes, uint32_t totalHour
     std::vector<uint8_t> payload = variable_speed::formatCommand14Data(totalMinutes, totalHours, historicalMinutes, historicalHours);
     writeFrame(0x0E, payload);
 }
+
+void VariableSpeedMaster::sendCommandF7(uint8_t controlCommand) {
+    std::vector<uint8_t> payload = variable_speed::formatCommandF7Data(controlCommand);
+    writeFrame(0xF7, payload);
+}

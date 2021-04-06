@@ -24,11 +24,11 @@ namespace genset_whisperpower_ddc {
 
         /** Total frame size of sent packet
          */
-        static const int SENT_FRAME_SIZE = 16;
+        static const int SENT_FRAME_SIZE = 10;
 
         /** Total frame size of received packet
          */
-        static const int RECEIVED_FRAME_SIZE = 10;
+        static const int RECEIVED_FRAME_SIZE = 16;
 
         /** Number of bytes in a frame on top of the frame payload itself
          */
@@ -81,6 +81,10 @@ namespace genset_whisperpower_ddc {
         /** Validates the checksum contained at the end of the frame
          */
         bool isChecksumValid(uint8_t const* start, uint8_t const* end);
+
+        /** Format payload for command F7
+         */
+        std::vector<uint8_t> formatCommandF7Data(uint8_t controlCommand);
 
         /** Format payload for command 02
          * 

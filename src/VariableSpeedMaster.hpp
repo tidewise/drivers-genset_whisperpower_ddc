@@ -15,7 +15,7 @@ namespace genset_whisperpower_ddc {
         /*
          *  
          */
-        base::Time m_interframe_delay = base::Time::fromMilliseconds(250); 
+        base::Time m_interframe_delay = base::Time::fromMilliseconds(20); 
 
         /** Internal read buffer */
         std::vector<uint8_t> m_read_buffer;
@@ -73,6 +73,10 @@ namespace genset_whisperpower_ddc {
                 uint8_t totalMinutes, uint32_t totalHours,
                 uint8_t historicalMinutes, uint32_t historicalHours
             );
+
+            /** Send a command 14 frame
+             */
+            void sendCommandF7(uint8_t controlCommand);
     };
 
 }
