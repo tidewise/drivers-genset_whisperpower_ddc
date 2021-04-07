@@ -18,10 +18,6 @@ namespace genset_whisperpower_ddc {
          */
         static const int SOURCE_ADDRESS = 0x0088;
 
-        /** Maximum total frame size
-         */
-        static const int FRAME_MAX_SIZE = 16;
-
         /** Total frame size of sent packet
          */
         static const int SENT_FRAME_SIZE = 10;
@@ -85,70 +81,6 @@ namespace genset_whisperpower_ddc {
         /** Format payload for command F7
          */
         std::vector<uint8_t> formatCommandF7Data(uint8_t controlCommand);
-
-        /** Format payload for command 02
-         * 
-         * @arg RPM
-         * @arg Udc start battery: value x 0.01 V
-         * @arg Status bits (A)
-         * @arg Status bits (B)
-         * @arg Status bits (C)
-         * @arg Generator status
-         * @arg Generator type
-         */
-        std::vector<uint8_t> formatCommand02Data(
-            uint16_t rpm, uint16_t udcStartBattery, uint8_t statusA,
-            uint8_t statusB, uint8_t statusC, uint8_t generatorStatus,
-            uint8_t generatorType
-        );
-
-        /** Format payload for command 14
-         * 
-         * @arg Total run time to be reset after maintenance (Minutes)
-         * @arg Total run time to be reset after maintenance (Hours)
-         * @arg Historical run time (Minutes)
-         * @arg Historical run time (Hours)
-         */
-        std::vector<uint8_t> formatCommand14Data(
-            uint8_t totalMinutes, uint32_t totalHours,
-            uint8_t historicalMinutes, uint32_t historicalHours
-        );
-
-        /** Convert a set of bits into a byte that can be passed to Command02 as the status(A-C) arguments
-         */
-        uint8_t getStatusByte(bool bit0, bool bit1, bool bit2, bool bit3, bool bit4, bool bit5, bool bit6, bool bit7);
-
-        /** Call getStatusByte, passing the specific Status(A) variables as bits
-         * 
-         * @arg Overall alarm
-         * @arg Engine temperature alarm
-         * @arg PM voltage alarm
-         * @arg Oil pressure alarm
-         * @arg Exhaust temperature alarm
-         * @arg Uac1 alarm
-         * @arg Iac1 alarm
-         * @arg Oil pressure high alarm
-         */
-        uint8_t getStatusByteA(bool overallAlarm, bool engineTempAlarm, bool pmVoltageAlarm, bool oilPressAlarm,
-                       bool exhaustTempAlarm, bool uac1Alarm, bool iac1Alarm, bool oilPressHighAlarm);
-
-        /** Call getStatusByte, passing the specific Status(B) variables as bits or setting the bit false if it is not used
-         * 
-         * @arg Low start battery voltage alarm
-         * @arg Start failure
-         * @arg Run signal
-         * @arg Start by Operation unit
-         */
-        uint8_t getStatusByteB(bool lowStartBatteryVoltAlarm, bool startFailure, bool runSignal, bool startByOpUnit);
-
-        /** Call getStatusByte, passing the specific Status(C) variables as bits or setting the bit false if it is not used
-         * 
-         * @arg 50Hz model detection
-         * @arg 60Hz model detection
-         * @arg 3 phase model detection
-         * @arg Mobile model detection
-         */
-        uint8_t getStatusByteC(bool mdlDetection50Hz, bool mdlDetection60Hz, bool mdlDetection3Phase, bool mobileMdlDetection);
     }
 
 }

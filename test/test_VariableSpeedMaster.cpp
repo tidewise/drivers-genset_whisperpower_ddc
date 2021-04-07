@@ -85,7 +85,7 @@ TEST_F(VariableSpeedMasterTest, it_writes_a_frame) {
 
 TEST_F(VariableSpeedMasterTest, it_sends_command_F7) {
     driver.openURI("test://");
-    
+
     driver.sendCommandF7(0x02);
     auto bytes = readDataFromDriver();
 
@@ -93,31 +93,3 @@ TEST_F(VariableSpeedMasterTest, it_sends_command_F7) {
                            (variable_speed::SOURCE_ADDRESS >> 8) & 0xFF, 0xF7, 0x02, 0x00, 0x00, 0x00, 0x02 };
      ASSERT_THAT(bytes, ElementsAreArray(expected));
 }
-
-/*
-TEST_F(VariableSpeedMasterTest, it_sends_command_02) {
-    driver.openURI("test://");
-
-    uint8_t statusA = variable_speed::getStatusByteA(true, false, true, false, true, false, true, false); // 0b01010101 = 0x55
-    uint8_t statusB = variable_speed::getStatusByteB(false, true, false, true); // 0b10010000 = 0x90
-    uint8_t statusC = variable_speed::getStatusByteC(true, false, true, false); // 0b00010100 = 0x14
-
-    driver.sendCommand02(0x4A38, 0x00E6, statusA, statusB, statusC, 0x01, 0x04);
-    auto bytes = readDataFromDriver();
-
-    uint8_t expected[] = { variable_speed::TARGET_ADDRESS & 0xFF, (variable_speed::TARGET_ADDRESS >> 8) & 0xFF, variable_speed::SOURCE_ADDRESS & 0xFF,
-                           (variable_speed::SOURCE_ADDRESS >> 8) & 0xFF, 0x02, 0x38, 0x4A, 0xE6, 0x00, statusA, statusB, statusC, 0x01, 0x04, 0x00, 0x71 };
-    ASSERT_THAT(bytes, ElementsAreArray(expected));
-}
-
-TEST_F(VariableSpeedMasterTest, it_sends_command_14) {
-    driver.openURI("test://");
-
-    driver.sendCommand14(0x1E, 0x000186A0, 0x0F, 0x00011170);
-    auto bytes = readDataFromDriver();
-
-    uint8_t expected[] = { variable_speed::TARGET_ADDRESS & 0xFF, (variable_speed::TARGET_ADDRESS >> 8) & 0xFF, variable_speed::SOURCE_ADDRESS & 0xFF,
-                           (variable_speed::SOURCE_ADDRESS >> 8) & 0xFF, 0x0E, 0x1E, 0xA0, 0x86, 0x01, 0x0F, 0x70, 0x11, 0x01, 0x00, 0x00, 0xED };
-    ASSERT_THAT(bytes, ElementsAreArray(expected));
-}
-*/

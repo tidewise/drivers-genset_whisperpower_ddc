@@ -77,26 +77,3 @@ TEST_F(VariableSpeedTest, it_recognizes_a_valid_checksum) {
                            (variable_speed::SOURCE_ADDRESS >> 8) & 0xFF, 0x02, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0x38 };
     ASSERT_TRUE(variable_speed::isChecksumValid(frame, frame + 16));
 }
-
-/*
-TEST_F(VariableSpeedTest, it_gets_status_byte_from_bitset) {
-    uint8_t statusByte =  variable_speed::getStatusByte(true, false, false, true, true, true, false, true); // 0b10111001 = 0xB9
-    ASSERT_EQ(0xB9, statusByte);
-}
-
-TEST_F(VariableSpeedTest, it_formats_command_02_data) {
-    uint8_t statusA = variable_speed::getStatusByteA(true, false, true, false, true, false, true, false);
-    uint8_t statusB = variable_speed::getStatusByteB(false, true, false, true);
-    uint8_t statusC = variable_speed::getStatusByteC(true, false, true, false);
-    
-    std::vector<uint8_t> payload = variable_speed::formatCommand02Data(0x4A38, 0x00E6, statusA, statusB, statusC, 0x01, 0x04);
-    uint8_t expected[] = { 0x38, 0x4A, 0xE6, 0x00, statusA, statusB, statusC, 0x01, 0x04, 0x00 };
-    ASSERT_THAT(payload, ElementsAreArray(expected));
-}
-
-TEST_F(VariableSpeedTest, it_formats_command_14_data) {
-    std::vector<uint8_t> payload = variable_speed::formatCommand14Data(0x1E, 0x000186A0, 0x0F, 0x00011170);
-    uint8_t expected[] = { 0x1E, 0xA0, 0x86, 0x01, 0x0F, 0x70, 0x11, 0x01, 0x00, 0x00 };
-    ASSERT_THAT(payload, ElementsAreArray(expected));
-}
-*/

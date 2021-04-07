@@ -9,11 +9,11 @@ int VariableSpeedMaster::extractPacket(uint8_t const* buffer, size_t bufferSize)
     throw std::logic_error("genset_whisperpower_dcc::VariableSpeedMaster should be read only using readRaw");
 }
 
-VariableSpeedMaster::VariableSpeedMaster() : iodrivers_base::Driver(variable_speed::FRAME_MAX_SIZE * 10) {
+VariableSpeedMaster::VariableSpeedMaster() : iodrivers_base::Driver(variable_speed::RECEIVED_FRAME_SIZE * 10) {
     setReadTimeout(base::Time::fromSeconds(1));
     m_read_buffer.resize(MAX_PACKET_SIZE);
     m_write_buffer.resize(MAX_PACKET_SIZE);
-    m_frame.payload.reserve(variable_speed::FRAME_MAX_SIZE);
+    m_frame.payload.reserve(variable_speed::RECEIVED_FRAME_SIZE);
 }
 
 
@@ -34,19 +34,6 @@ void VariableSpeedMaster::writeFrame(uint8_t command, std::vector<uint8_t> const
     uint8_t* start = &m_write_buffer[0];
     uint8_t const* end = variable_speed::formatFrame(start, variable_speed::TARGET_ADDRESS, variable_speed::SOURCE_ADDRESS, command, payload);
     writePacket(&m_write_buffer[0], end - start);
-}
-
-void VariableSpeedMaster::sendCommand02(uint16_t rpm, uint16_t udcStartBattery, uint8_t statusA,
-                                    uint8_t statusB, uint8_t statusC, uint8_t generatorStatus,
-                                    uint8_t generatorType) {
-    std::vector<uint8_t> payload = variable_speed::formatCommand02Data(rpm, udcStartBattery, statusA, statusB, statusC, generatorStatus, generatorType);
-    writeFrame(0x02, payload);
-}
-
-void VariableSpeedMaster::sendCommand14(uint8_t totalMinutes, uint32_t totalHours,
-                                    uint8_t historicalMinutes, uint32_t historicalHours) {
-    std::vector<uint8_t> payload = variable_speed::formatCommand14Data(totalMinutes, totalHours, historicalMinutes, historicalHours);
-    writeFrame(0x0E, payload);
 }
 
 void VariableSpeedMaster::sendCommandF7(uint8_t controlCommand) {
