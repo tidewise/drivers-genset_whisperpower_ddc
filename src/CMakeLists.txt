@@ -3,5 +3,5 @@ rock_library(genset_whisperpower_ddc
     HEADERS VariableSpeed.hpp VariableSpeedMaster.hpp Frame.hpp
     DEPS_PKGCONFIG base-types iodrivers_base)
 
-rock_executable(genset_whisperpower_ddc_bin Main.cpp
+rock_executable(genset_whisperpower_ddc_ctl Main.cpp
     DEPS genset_whisperpower_ddc)
