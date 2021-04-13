@@ -94,7 +94,7 @@ int main(int argc, char** argv)
 
         args.pop_front();
 
-        genset_whisperpower_ddc_master->sendCommandF7(
+        genset_whisperpower_ddc_master->sendControlCommand(
             controlCommand
         );
     }

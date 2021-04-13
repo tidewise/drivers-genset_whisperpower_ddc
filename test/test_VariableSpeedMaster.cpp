@@ -83,10 +83,10 @@ TEST_F(VariableSpeedMasterTest, it_writes_a_frame) {
 }
 
 
-TEST_F(VariableSpeedMasterTest, it_sends_command_F7) {
+TEST_F(VariableSpeedMasterTest, it_sends_control_command) {
     driver.openURI("test://");
 
-    driver.sendCommandF7(0x02);
+    driver.sendControlCommand(0x02);
     auto bytes = readDataFromDriver();
 
     uint8_t expected[] = { variable_speed::TARGET_ADDRESS & 0xFF, (variable_speed::TARGET_ADDRESS >> 8) & 0xFF, variable_speed::SOURCE_ADDRESS & 0xFF,

@@ -36,7 +36,7 @@ void VariableSpeedMaster::writeFrame(uint8_t command, std::vector<uint8_t> const
     writePacket(&m_write_buffer[0], end - start);
 }
 
-void VariableSpeedMaster::sendCommandF7(uint8_t controlCommand) {
+void VariableSpeedMaster::sendControlCommand(uint8_t controlCommand) {
     std::vector<uint8_t> payload = variable_speed::formatCommandF7Data(controlCommand);
     writeFrame(0xF7, payload);
 }

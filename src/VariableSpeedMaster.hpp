@@ -48,7 +48,7 @@ namespace genset_whisperpower_ddc {
 
             /** Send a command 14 frame
              */
-            void sendCommandF7(uint8_t controlCommand);
+            void sendControlCommand(uint8_t controlCommand);
     };
 
 }
