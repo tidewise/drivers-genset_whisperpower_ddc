@@ -3,6 +3,7 @@
 #include <memory>
 #include <genset_whisperpower_ddc/VariableSpeedMaster.hpp>
 #include <genset_whisperpower_ddc/GeneratorStatus.hpp>
+#include <genset_whisperpower_ddc/ControlCommand.hpp>
 #include <bits/stdc++.h>
 
 using namespace std;
@@ -29,39 +30,6 @@ std::string statusToString(GeneratorStatus status) {
     }
     return "UNKNOWN";
 }
-
-struct Command02Data {
-    int rpm;
-    int udcStartBattery;
-    bool overallAlarm;
-    bool engineTempAlarm;
-    bool pmVoltageAlarm;
-    bool oilPressAlarm;
-    bool exhaustTempAlarm;
-    bool uac1Alarm;
-    bool iac1Alarm;
-    bool oilPressHighAlarm;
-    bool lowStartBatteryVoltAlarm;
-    bool startFailure;
-    bool runSignal;
-    bool startByOpUnit;
-    bool modelDetection50Hz;
-    bool modelDetection60Hz;
-    bool modelDetection3Phase;
-    bool modelDetectionMobile;
-    GeneratorStatus generatorStatus;
-    int generatorType;
-};
-
-struct Command14Data
-{
-    int totalMinutes;
-    int totalHours;
-    int historicalMinutes;
-    int historicalHours;
-};
-
-
 
 void usage(ostream& stream) {
     stream << "usage: genset_whisperpower_ddc_ctl URI CMD\n"
@@ -106,17 +74,17 @@ int main(int argc, char** argv)
             return 1;
         }
 
-        string control_command_arg = args.front();
-        int control_command;
+        string controlCommandArg = args.front();
+        ControlCommand controlCommand;
 
-        if (control_command_arg == "start") {
-            control_command = 1;
+        if (controlCommandArg == "start") {
+            controlCommand = ControlCommand::start;
         }
-        else if (control_command_arg == "stop") {
-            control_command = 2;
+        else if (controlCommandArg == "stop") {
+            controlCommand = ControlCommand::stop;
         }
-        else if (control_command_arg == "keep_alive") {
-            control_command = 3;
+        else if (controlCommandArg == "keep_alive") {
+            controlCommand = ControlCommand::keepAlive;
         }
         else {
             cerr << "unknown control command\n\n";
@@ -127,7 +95,7 @@ int main(int argc, char** argv)
         args.pop_front();
 
         genset_whisperpower_ddc_master->sendCommandF7(
-            control_command
+            controlCommand
         );
     }
     else if (cmd == "read-frame") {
@@ -150,95 +118,94 @@ int main(int argc, char** argv)
         }
 
         if (frame.command == 2){
-            Command02Data data;
-            data.rpm = (frame.payload[1] << 8) | frame.payload[0];
-            data.udcStartBattery = (frame.payload[3] << 8) | frame.payload[2];
+            int rpm = (frame.payload[1] << 8) | frame.payload[0];
+            int udcStartBattery = (frame.payload[3] << 8) | frame.payload[2];
             std::bitset<8> statusA(frame.payload[4]);
-            data.overallAlarm = statusA[0];
-            data.engineTempAlarm = statusA[1];
-            data.pmVoltageAlarm = statusA[2];
-            data.oilPressAlarm = statusA[3];
-            data.exhaustTempAlarm = statusA[4];
-            data.uac1Alarm = statusA[5];
-            data.iac1Alarm = statusA[6];
-            data.oilPressHighAlarm = statusA[7];
+            bool overallAlarm = statusA[0];
+            bool engineTempAlarm = statusA[1];
+            bool pmVoltageAlarm = statusA[2];
+            bool oilPressAlarm = statusA[3];
+            bool exhaustTempAlarm = statusA[4];
+            bool uac1Alarm = statusA[5];
+            bool iac1Alarm = statusA[6];
+            bool oilPressHighAlarm = statusA[7];
             std::bitset<8> statusB(frame.payload[5]);
-            data.lowStartBatteryVoltAlarm = statusB[2];
-            data.startFailure = statusB[4];
-            data.runSignal = statusB[5];
-            data.startByOpUnit = statusB[7];
+            bool lowStartBatteryVoltAlarm = statusB[2];
+            bool startFailure = statusB[4];
+            bool runSignal = statusB[5];
+            bool startByOpUnit = statusB[7];
             std::bitset<8> statusC(frame.payload[6]);
-            data.modelDetection50Hz = statusC[2];
-            data.modelDetection60Hz = statusC[3];
-            data.modelDetection3Phase = statusC[4];
-            data.modelDetectionMobile = statusC[5];
+            bool modelDetection50Hz = statusC[2];
+            bool modelDetection60Hz = statusC[3];
+            bool modelDetection3Phase = statusC[4];
+            bool modelDetectionMobile = statusC[5];
+            GeneratorStatus generatorStatus;
             if (frame.payload[7] < 0x0E){
-                data.generatorStatus = static_cast<GeneratorStatus>(frame.payload[7]);
+                generatorStatus = static_cast<GeneratorStatus>(frame.payload[7]);
             }
             else{
-                data.generatorStatus = STATUS_UNKNOWN;
+                generatorStatus = STATUS_UNKNOWN;
             }
-            data.generatorType = frame.payload[8];
+            int generatorType = frame.payload[8];
 
-            cout << "RPM: " << std::dec << data.rpm << endl;
-            cout << "Udc start battery: " << std::dec << data.udcStartBattery * 0.01 << "V" << endl;
+            cout << "RPM: " << std::dec << rpm << endl;
+            cout << "Udc start battery: " << std::dec << udcStartBattery * 0.01 << "V" << endl;
             cout << "Alarms:" << endl;
-            if (data.overallAlarm){
+            if (overallAlarm){
                 cout << "    overall" << endl;
             }
-            if (data.engineTempAlarm){
+            if (engineTempAlarm){
                 cout << "    engine temperature" << endl;
             }
-            if (data.pmVoltageAlarm){
+            if (pmVoltageAlarm){
                 cout << "    PM voltage" << endl;
             }
-            if (data.oilPressAlarm){
+            if (oilPressAlarm){
                 cout << "    oil pressure" << endl;
             }
-            if (data.exhaustTempAlarm){
+            if (exhaustTempAlarm){
                 cout << "    exhaust temperature" << endl;
             }
-            if (data.uac1Alarm){
+            if (uac1Alarm){
                 cout << "    Uac1" << endl;
             }
-            if (data.iac1Alarm){
+            if (iac1Alarm){
                 cout << "    Iac1" << endl;
             }
-            if (data.oilPressHighAlarm){
+            if (oilPressHighAlarm){
                 cout << "    oil pressure high" << endl;
             }
-            if (data.lowStartBatteryVoltAlarm){
+            if (lowStartBatteryVoltAlarm){
                 cout << "    low start battery voltage" << endl;
             }
-            cout << "start failure: " << (data.startFailure ? "true" : "false") << endl;
-            cout << "run signal: " << (data.runSignal ? "true" : "false") << endl;
-            cout << "start by operation unit: " << (data.startByOpUnit ? "true" : "false") << endl;
+            cout << "start failure: " << (startFailure ? "true" : "false") << endl;
+            cout << "run signal: " << (runSignal ? "true" : "false") << endl;
+            cout << "start by operation unit: " << (startByOpUnit ? "true" : "false") << endl;
             cout << "Model detection:" << endl;
-            if (data.modelDetection50Hz){
+            if (modelDetection50Hz){
                 cout << "    50 Hz model detection" << endl;
             }
-            if (data.modelDetection60Hz){
+            if (modelDetection60Hz){
                 cout << "    60 Hz model detection" << endl;
             }
-            if (data.modelDetection3Phase){
+            if (modelDetection3Phase){
                 cout << "    3 phase model detection" << endl;
             }
-            if (data.modelDetectionMobile){
+            if (modelDetectionMobile){
                 cout << "    mobile model detection" << endl;
             }
-            cout << "generator status: " << statusToString(data.generatorStatus)  << endl;
-            cout << "generator type: " << std::dec << data.generatorType << endl;
+            cout << "generator status: " << statusToString(generatorStatus)  << endl;
+            cout << "generator type: " << std::dec << generatorType << endl;
             cout << endl;
         }
         else if (frame.command == 14) {
-            Command14Data data;
-            data.totalMinutes = frame.payload[0];
-            data.totalHours = (frame.payload[3] << 16) | (frame.payload[2] << 8) | frame.payload[1];
-            data.historicalMinutes = frame.payload[4];
-            data.historicalHours = (frame.payload[7] << 16) | (frame.payload[6] << 8) | frame.payload[5];
+            int totalMinutes = frame.payload[0];
+            int totalHours = (frame.payload[3] << 16) | (frame.payload[2] << 8) | frame.payload[1];
+            int historicalMinutes = frame.payload[4];
+            int historicalHours = (frame.payload[7] << 16) | (frame.payload[6] << 8) | frame.payload[5];
 
-            cout << "total run time to be reset after maintenance: " << std::dec << data.totalHours << "h" << data.totalMinutes << "min" << endl;
-            cout << "historical run time: " << std::dec << data.historicalHours << "h" << data.historicalMinutes << "min" << endl;
+            cout << "total run time to be reset after maintenance: " << std::dec << totalHours << "h" << totalMinutes << "min" << endl;
+            cout << "historical run time: " << std::dec << historicalHours << "h" << historicalMinutes << "min" << endl;
             cout << endl;
         }
         else {
