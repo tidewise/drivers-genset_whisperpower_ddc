@@ -3,9 +3,9 @@
 
 namespace genset_whisperpower_ddc {
     enum ControlCommand {
-        start = 1,
-        stop = 2,
-        keepAlive = 3
+        CONTROL_CMD_START = 1,
+        CONTROL_CMD_STOP = 2,
+        CONTROL_CMD_KEEP_ALIVE = 3
     };
 }
 

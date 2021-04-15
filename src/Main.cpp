@@ -78,13 +78,13 @@ int main(int argc, char** argv)
         ControlCommand controlCommand;
 
         if (controlCommandArg == "start") {
-            controlCommand = ControlCommand::start;
+            controlCommand = CONTROL_CMD_START;
         }
         else if (controlCommandArg == "stop") {
-            controlCommand = ControlCommand::stop;
+            controlCommand = CONTROL_CMD_STOP;
         }
         else if (controlCommandArg == "keep_alive") {
-            controlCommand = ControlCommand::keepAlive;
+            controlCommand = CONTROL_CMD_KEEP_ALIVE;
         }
         else {
             cerr << "unknown control command\n\n";
