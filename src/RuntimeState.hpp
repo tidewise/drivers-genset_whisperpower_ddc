@@ -12,6 +12,8 @@ namespace genset_whisperpower_ddc {
         int historical_runtime_minutes;
         int historical_runtime_hours;
     };
+
+    std::ostream& operator << (std::ostream& io, RuntimeState const& state);
 }
 
 #endif

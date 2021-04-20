@@ -47,6 +47,8 @@ namespace genset_whisperpower_ddc {
         GeneratorStatus generator_status;
         int generator_type;
     };
+
+    std::ostream& operator << (std::ostream& io, GeneratorState const& state);
 }
 
 #endif
