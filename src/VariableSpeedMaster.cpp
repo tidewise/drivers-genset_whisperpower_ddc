@@ -13,7 +13,6 @@ VariableSpeedMaster::VariableSpeedMaster() : iodrivers_base::Driver(variable_spe
     setReadTimeout(base::Time::fromSeconds(1));
     m_read_buffer.resize(MAX_PACKET_SIZE);
     m_write_buffer.resize(MAX_PACKET_SIZE);
-    m_frame.payload.reserve(variable_speed::RECEIVED_FRAME_SIZE);
 }
 
 
@@ -39,4 +38,36 @@ void VariableSpeedMaster::writeFrame(uint8_t command, std::vector<uint8_t> const
 void VariableSpeedMaster::sendControlCommand(uint8_t controlCommand) {
     std::vector<uint8_t> payload = variable_speed::formatCommandF7Data(controlCommand);
     writeFrame(0xF7, payload);
+}
+
+GeneratorState VariableSpeedMaster::parseGeneratorState(std::vector<uint8_t> payload, base::Time const& time)
+{
+    GeneratorState generator_state;
+    generator_state.time = time;
+    generator_state.rpm = (payload[1] << 8) | payload[0];
+    generator_state.udc_start_battery = (payload[3] << 8) | payload[2];
+    generator_state.statusA = payload[4];
+    generator_state.statusB = payload[5];
+    generator_state.statusC = payload[6];
+    if (payload[7] < 0x0E){
+        generator_state.generator_status = static_cast<GeneratorStatus>(payload[7]);
+    }
+    else{
+        generator_state.generator_status = STATUS_UNKNOWN;
+    }
+    generator_state.generator_type = payload[8];
+
+    return generator_state;
+}
+
+RuntimeState VariableSpeedMaster::parseRuntimeState(std::vector<uint8_t> payload, base::Time const& time)
+{
+    RuntimeState runtime_state;
+    runtime_state.time = time;
+    runtime_state.total_runtime_minutes = payload[0];
+    runtime_state.total_runtime_hours = (payload[3] << 16) | (payload[2] << 8) | payload[1];
+    runtime_state.historical_runtime_minutes = payload[4];
+    runtime_state.historical_runtime_hours = (payload[7] << 16) | (payload[6] << 8) | payload[5];
+
+    return runtime_state;
 }

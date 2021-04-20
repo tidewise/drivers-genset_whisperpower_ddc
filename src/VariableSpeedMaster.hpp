@@ -3,6 +3,8 @@
 
 #include <iodrivers_base/Driver.hpp>
 #include <genset_whisperpower_ddc/Frame.hpp>
+#include <genset_whisperpower_ddc/GeneratorState.hpp>
+#include <genset_whisperpower_ddc/RuntimeState.hpp>
 #include <iodrivers_base/Driver.hpp>
 
 namespace genset_whisperpower_ddc {
@@ -22,12 +24,6 @@ namespace genset_whisperpower_ddc {
 
         /** Internal write buffer */
         std::vector<uint8_t> m_write_buffer;
-
-        /** Internal frame object
-         *
-         * This is used to avoid unnecessary memory allocation
-         */
-        Frame m_frame;
 
         public:
             VariableSpeedMaster();
@@ -49,6 +45,10 @@ namespace genset_whisperpower_ddc {
             /** Send a command 14 frame
              */
             void sendControlCommand(uint8_t controlCommand);
+
+            GeneratorState parseGeneratorState(std::vector<uint8_t> payload, base::Time const& time);
+
+            RuntimeState parseRuntimeState(std::vector<uint8_t> payload, base::Time const& time);
     };
 
 }
