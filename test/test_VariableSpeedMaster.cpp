@@ -12,32 +12,10 @@ using testing::ElementsAreArray;
 using base::Time;
 
 struct VariableSpeedMasterTest : public ::testing::Test, iodrivers_base::Fixture<VariableSpeedMaster> {
-    int pipeTX = -1;
-
     VariableSpeedMasterTest() {
     }
 
     ~VariableSpeedMasterTest() {
-        if (pipeTX != -1) {
-            close(pipeTX);
-        }
-    }
-
-    void openPipe() {
-        int pipes[2];
-        ASSERT_EQ(pipe(pipes), 0);
-        int rx = pipes[0];
-        int tx = pipes[1];
-
-        long fd_flags = fcntl(rx, F_GETFL);
-        fcntl(rx, F_SETFL, fd_flags | O_NONBLOCK);
-
-        driver.setFileDescriptor(rx, true);
-        pipeTX = tx;
-    }
-
-    void writeToPipe(uint8_t const* bytes, int size) {
-        ASSERT_EQ(write(pipeTX, bytes, size), 1);
     }
 };
 
@@ -50,16 +28,11 @@ TEST_F(VariableSpeedMasterTest, it_throws_if_calling_readPacket) {
 }
 
 TEST_F(VariableSpeedMasterTest, it_reads_a_frame) {
-    openPipe();
+    driver.openURI("test://");
 
-    uint8_t bytes[] = { variable_speed::TARGET_ADDRESS & 0xFF, (variable_speed::TARGET_ADDRESS >> 8) & 0xFF, variable_speed::SOURCE_ADDRESS & 0xFF,
+    std::vector<uint8_t> buffer = { variable_speed::TARGET_ADDRESS & 0xFF, (variable_speed::TARGET_ADDRESS >> 8) & 0xFF, variable_speed::SOURCE_ADDRESS & 0xFF,
                            (variable_speed::SOURCE_ADDRESS >> 8) & 0xFF, 0x02, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0x38 };
-    thread writeThread([this,&bytes]{
-        for (uint8_t i = 0; i < 16; ++i) {
-            writeToPipe(bytes + i, 1);
-            usleep(1000);
-        }
-    });
+    pushDataToDriver(&buffer[0], &buffer[16]);
 
     Frame frame = driver.readFrame();
     ASSERT_EQ(variable_speed::TARGET_ADDRESS, frame.targetID);
@@ -67,8 +40,6 @@ TEST_F(VariableSpeedMasterTest, it_reads_a_frame) {
     ASSERT_EQ(0x02, frame.command);
     uint8_t payload[10] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
     ASSERT_THAT(frame.payload, ElementsAreArray(payload));
-
-    writeThread.join();
 }
 
 TEST_F(VariableSpeedMasterTest, it_writes_a_frame) {
@@ -95,16 +66,11 @@ TEST_F(VariableSpeedMasterTest, it_sends_control_command) {
 }
 
 TEST_F(VariableSpeedMasterTest, it_parses_generator_state) {
-    openPipe();
+    driver.openURI("test://");
 
-    uint8_t bytes[] = { variable_speed::TARGET_ADDRESS & 0xFF, (variable_speed::TARGET_ADDRESS >> 8) & 0xFF, variable_speed::SOURCE_ADDRESS & 0xFF,
+    std::vector<uint8_t> buffer = { variable_speed::TARGET_ADDRESS & 0xFF, (variable_speed::TARGET_ADDRESS >> 8) & 0xFF, variable_speed::SOURCE_ADDRESS & 0xFF,
                            (variable_speed::SOURCE_ADDRESS >> 8) & 0xFF, 0x02, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0x38 };
-    thread writeThread([this,&bytes]{
-        for (uint8_t i = 0; i < 16; ++i) {
-            writeToPipe(bytes + i, 1);
-            usleep(1000);
-        }
-    });
+    pushDataToDriver(&buffer[0], &buffer[16]);
 
     Frame frame = driver.readFrame();
 
@@ -131,21 +97,14 @@ TEST_F(VariableSpeedMasterTest, it_parses_generator_state) {
     ASSERT_EQ(generatorState.statusC, expectedState.statusC);
     ASSERT_EQ(generatorState.generator_status, expectedState.generator_status);
     ASSERT_EQ(generatorState.generator_type, expectedState.generator_type);
-
-    writeThread.join();
 }
 
 TEST_F(VariableSpeedMasterTest, it_parses_runtime_state) {
-    openPipe();
+    driver.openURI("test://");
 
-    uint8_t bytes[] = { variable_speed::TARGET_ADDRESS & 0xFF, (variable_speed::TARGET_ADDRESS >> 8) & 0xFF, variable_speed::SOURCE_ADDRESS & 0xFF,
+    std::vector<uint8_t> buffer = { variable_speed::TARGET_ADDRESS & 0xFF, (variable_speed::TARGET_ADDRESS >> 8) & 0xFF, variable_speed::SOURCE_ADDRESS & 0xFF,
                            (variable_speed::SOURCE_ADDRESS >> 8) & 0xFF, 0x0E, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0x44 };
-    thread writeThread([this,&bytes]{
-        for (uint8_t i = 0; i < 16; ++i) {
-            writeToPipe(bytes + i, 1);
-            usleep(1000);
-        }
-    });
+    pushDataToDriver(&buffer[0], &buffer[16]);
 
     Frame frame = driver.readFrame();
 
@@ -166,6 +125,4 @@ TEST_F(VariableSpeedMasterTest, it_parses_runtime_state) {
     ASSERT_EQ(runtimeState.total_runtime_hours, expectedState.total_runtime_hours);
     ASSERT_EQ(runtimeState.historical_runtime_minutes, expectedState.historical_runtime_minutes);
     ASSERT_EQ(runtimeState.historical_runtime_hours, expectedState.historical_runtime_hours);
-
-    writeThread.join();
 }
