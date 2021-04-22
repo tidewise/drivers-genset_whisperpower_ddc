@@ -38,9 +38,7 @@ int main(int argc, char** argv)
     string cmd = args.front();
     args.pop_front();
 
-    std::unique_ptr<genset_whisperpower_ddc::VariableSpeedMaster> genset_whisperpower_ddc_master;
-    auto* master = new genset_whisperpower_ddc::VariableSpeedMaster();
-    genset_whisperpower_ddc_master.reset(master);
+    std::unique_ptr<VariableSpeedMaster> master(new VariableSpeedMaster());
     master->openURI(uri);
 
     if (cmd == "send_control_command") {
@@ -70,7 +68,7 @@ int main(int argc, char** argv)
 
         args.pop_front();
 
-        genset_whisperpower_ddc_master->sendControlCommand(
+        master->sendControlCommand(
             controlCommand
         );
     }
@@ -82,10 +80,7 @@ int main(int argc, char** argv)
         }
 
         auto now = base::Time::now();
-        Frame frame;// = genset_whisperpower_ddc_master->readFrame();
-        frame.targetID = 0x0081;
-        frame.sourceID = 0x0088;
-        frame.command = 14;
+        Frame frame = master->readFrame();
 
         if (frame.targetID != 0x0081) {
             cerr << "unknown target ID '0x" <<  std::hex << (uint16_t) frame.targetID << "'\n\n";
@@ -98,12 +93,12 @@ int main(int argc, char** argv)
         }
 
         if (frame.command == 2){
-            GeneratorState generatorState = genset_whisperpower_ddc_master->parseGeneratorState(frame.payload, now);
+            GeneratorState generatorState = master->parseGeneratorState(frame.payload, now);
 
             cout << generatorState << endl;
         }
         else if (frame.command == 14) {
-            RuntimeState runtimeState = genset_whisperpower_ddc_master->parseRuntimeState(frame.payload, now);
+            RuntimeState runtimeState = master->parseRuntimeState(frame.payload, now);
 
             cout << runtimeState << endl;
         }
