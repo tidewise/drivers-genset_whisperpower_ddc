@@ -83,18 +83,14 @@ TEST_F(VariableSpeedMasterTest, it_parses_generator_state) {
     expectedState.time = now;
     expectedState.rpm = 0x0100;
     expectedState.udc_start_battery = 0x0302;
-    expectedState.statusA = 0x04;
-    expectedState.statusB = 0x05;
-    expectedState.statusC = 0x06;
+    expectedState.status = 0x060504;
     expectedState.generator_status = GeneratorStatus::STATUS_PRESENT;
     expectedState.generator_type = 0x08;
 
     ASSERT_EQ(generatorState.time, expectedState.time);
     ASSERT_EQ(generatorState.rpm, expectedState.rpm);
     ASSERT_EQ(generatorState.udc_start_battery, expectedState.udc_start_battery);
-    ASSERT_EQ(generatorState.statusA, expectedState.statusA);
-    ASSERT_EQ(generatorState.statusB, expectedState.statusB);
-    ASSERT_EQ(generatorState.statusC, expectedState.statusC);
+    ASSERT_EQ(generatorState.status, expectedState.status);
     ASSERT_EQ(generatorState.generator_status, expectedState.generator_status);
     ASSERT_EQ(generatorState.generator_type, expectedState.generator_type);
 }
@@ -115,14 +111,11 @@ TEST_F(VariableSpeedMasterTest, it_parses_runtime_state) {
 
     RuntimeState expectedState;
     expectedState.time = now;
-    expectedState.total_runtime_minutes = 0x00;
-    expectedState.total_runtime_hours = 0x030201;
-    expectedState.historical_runtime_minutes = 0x04;
-    expectedState.historical_runtime_hours = 0x070605;
+    expectedState.total_runtime = Time::fromSeconds((0x030201 * 60 * 60) + (0x00 * 60));
+    expectedState.historical_runtime =  Time::fromSeconds((0x070605 * 60 * 60) + (0x04 * 60));
 
     ASSERT_EQ(runtimeState.time, expectedState.time);
-    ASSERT_EQ(runtimeState.total_runtime_minutes, expectedState.total_runtime_minutes);
-    ASSERT_EQ(runtimeState.total_runtime_hours, expectedState.total_runtime_hours);
-    ASSERT_EQ(runtimeState.historical_runtime_minutes, expectedState.historical_runtime_minutes);
-    ASSERT_EQ(runtimeState.historical_runtime_hours, expectedState.historical_runtime_hours);
+    ASSERT_EQ(runtimeState.total_runtime, expectedState.total_runtime);
+    ASSERT_EQ(runtimeState.historical_runtime, expectedState.historical_runtime);
+    ASSERT_EQ(runtimeState.historical_runtime, expectedState.historical_runtime);
 }

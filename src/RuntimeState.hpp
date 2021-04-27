@@ -7,10 +7,8 @@ namespace genset_whisperpower_ddc {
     struct RuntimeState {
         base::Time time;
         
-        int total_runtime_minutes; // Total run time to be reset after maintenance
-        int total_runtime_hours;
-        int historical_runtime_minutes;
-        int historical_runtime_hours;
+        base::Time total_runtime; // Total run time to be reset after maintenance
+        base::Time historical_runtime;
     };
 
     std::ostream& operator << (std::ostream& io, RuntimeState const& state);

@@ -38,26 +38,26 @@ std::ostream& genset_whisperpower_ddc::operator << (std::ostream& io, GeneratorS
 
     io << "Status flags:\n";
     io << "  Alarms:\n";
-    FLAG_OUT(state.statusA, OVERALL_ALARM);
-    FLAG_OUT(state.statusA, ENGINE_TEMPERATURE_ALARM);
-    FLAG_OUT(state.statusA, PM_VOLTAGE_ALARM);
-    FLAG_OUT(state.statusA, OIL_PRESSURE_ALARM);
-    FLAG_OUT(state.statusA, EXHAUST_TEMPERATURE_ALARM);
-    FLAG_OUT(state.statusA, UAC1_ALARM);
-    FLAG_OUT(state.statusA, IAC1_ALARM);
-    FLAG_OUT(state.statusA, OIL_PRESSURE_HIGH_ALARM);
-    FLAG_OUT(state.statusB, LOW_START_BATTERY_VOLTAGE_ALARM);
+    FLAG_OUT(state.status, OVERALL_ALARM);
+    FLAG_OUT(state.status, ENGINE_TEMPERATURE_ALARM);
+    FLAG_OUT(state.status, PM_VOLTAGE_ALARM);
+    FLAG_OUT(state.status, OIL_PRESSURE_ALARM);
+    FLAG_OUT(state.status, EXHAUST_TEMPERATURE_ALARM);
+    FLAG_OUT(state.status, UAC1_ALARM);
+    FLAG_OUT(state.status, IAC1_ALARM);
+    FLAG_OUT(state.status, OIL_PRESSURE_HIGH_ALARM);
+    FLAG_OUT(state.status, LOW_START_BATTERY_VOLTAGE_ALARM);
 
     io << "  Model detection:\n";
-    FLAG_OUT(state.statusC, MODEL_DETECTION_50HZ);
-    FLAG_OUT(state.statusC, MODEL_DETECTION_60HZ);
-    FLAG_OUT(state.statusC, MODEL_DETECTION_3_PHASE);
-    FLAG_OUT(state.statusC, MODEL_DETECTION_MOBILE);
+    FLAG_OUT(state.status, MODEL_DETECTION_50HZ);
+    FLAG_OUT(state.status, MODEL_DETECTION_60HZ);
+    FLAG_OUT(state.status, MODEL_DETECTION_3_PHASE);
+    FLAG_OUT(state.status, MODEL_DETECTION_MOBILE);
 
     io << "  Others:\n";
-    FLAG_OUT(state.statusB, START_FAILURE);
-    FLAG_OUT(state.statusB, RUN_SIGNAL);
-    FLAG_OUT(state.statusB, START_BY_OPERATION_UNIT);
+    FLAG_OUT(state.status, START_FAILURE);
+    FLAG_OUT(state.status, RUN_SIGNAL);
+    FLAG_OUT(state.status, START_BY_OPERATION_UNIT);
 
     io << "generator status: " << statusToString(state.generator_status)  << "\n";
     io << "generator type: " << std::dec << state.generator_type;

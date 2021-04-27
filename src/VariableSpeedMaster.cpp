@@ -46,9 +46,7 @@ GeneratorState VariableSpeedMaster::parseGeneratorState(std::vector<uint8_t> pay
     generator_state.time = time;
     generator_state.rpm = (payload[1] << 8) | payload[0];
     generator_state.udc_start_battery = (payload[3] << 8) | payload[2];
-    generator_state.statusA = payload[4];
-    generator_state.statusB = payload[5];
-    generator_state.statusC = payload[6];
+    generator_state.status = (payload[6] << 16) | (payload[5] << 8) | payload[4];
     if (payload[7] < 0x0E){
         generator_state.generator_status = static_cast<GeneratorStatus>(payload[7]);
     }
@@ -64,10 +62,11 @@ RuntimeState VariableSpeedMaster::parseRuntimeState(std::vector<uint8_t> payload
 {
     RuntimeState runtime_state;
     runtime_state.time = time;
-    runtime_state.total_runtime_minutes = payload[0];
-    runtime_state.total_runtime_hours = (payload[3] << 16) | (payload[2] << 8) | payload[1];
-    runtime_state.historical_runtime_minutes = payload[4];
-    runtime_state.historical_runtime_hours = (payload[7] << 16) | (payload[6] << 8) | payload[5];
-
+    int minutes = payload[0];
+    int hours = (payload[3] << 16) | (payload[2] << 8) | payload[1];
+    runtime_state.total_runtime = base::Time::fromSeconds((hours * 60 * 60) + (minutes * 60));
+    minutes = payload[4];
+    hours = (payload[7] << 16) | (payload[6] << 8) | payload[5];
+    runtime_state.historical_runtime = base::Time::fromSeconds((hours * 60 * 60) + (minutes * 60));
     return runtime_state;
 }
