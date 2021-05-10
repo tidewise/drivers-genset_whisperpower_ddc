@@ -91,7 +91,7 @@ uint8_t variable_speed::checksum(uint8_t const *start, uint8_t const *end)
     return (checksum & 0xFF); // get lowest byte
 }
 
-std::vector<uint8_t> variable_speed::formatStartStopCommandData(uint8_t controlCommand)
+std::vector<uint8_t> variable_speed::formatCommandF7Data(uint8_t controlCommand)
 {
     std::vector<uint8_t> payload;
     payload.push_back(controlCommand);

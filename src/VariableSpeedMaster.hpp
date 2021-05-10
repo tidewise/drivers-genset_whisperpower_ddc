@@ -4,8 +4,7 @@
 #include <iodrivers_base/Driver.hpp>
 #include <genset_whisperpower_ddc/Frame.hpp>
 #include <genset_whisperpower_ddc/GeneratorState.hpp>
-#include <genset_whisperpower_ddc/GeneratorModel.hpp>
-#include <genset_whisperpower_ddc/RunTimeState.hpp>
+#include <genset_whisperpower_ddc/RuntimeState.hpp>
 #include <iodrivers_base/Driver.hpp>
 
 namespace genset_whisperpower_ddc {
@@ -47,9 +46,9 @@ namespace genset_whisperpower_ddc {
              */
             void sendControlCommand(uint8_t controlCommand);
 
-            std::pair<GeneratorState, GeneratorModel> parseGeneratorStateAndModel(std::vector<uint8_t> payload, base::Time const& time);
+            GeneratorState parseGeneratorState(std::vector<uint8_t> payload, base::Time const& time);
 
-            RunTimeState parseRunTimeState(std::vector<uint8_t> payload, base::Time const& time);
+            RuntimeState parseRuntimeState(std::vector<uint8_t> payload, base::Time const& time);
     };
 
 }

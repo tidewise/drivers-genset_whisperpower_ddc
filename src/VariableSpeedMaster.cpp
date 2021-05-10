@@ -2,8 +2,6 @@
 #include <genset_whisperpower_ddc/VariableSpeed.hpp>
 #include <iostream>
 
-#define PI 3.141592653589793
-
 using namespace std;
 using namespace genset_whisperpower_ddc;
 
@@ -38,46 +36,37 @@ void VariableSpeedMaster::writeFrame(uint8_t command, std::vector<uint8_t> const
 }
 
 void VariableSpeedMaster::sendControlCommand(uint8_t controlCommand) {
-    std::vector<uint8_t> payload = variable_speed::formatStartStopCommandData(controlCommand);
-    writeFrame(variable_speed::PACKET_START_STOP, payload);
+    std::vector<uint8_t> payload = variable_speed::formatCommandF7Data(controlCommand);
+    writeFrame(0xF7, payload);
 }
 
-std::pair<GeneratorState, GeneratorModel> VariableSpeedMaster::parseGeneratorStateAndModel(std::vector<uint8_t> payload, base::Time const& time)
+GeneratorState VariableSpeedMaster::parseGeneratorState(std::vector<uint8_t> payload, base::Time const& time)
 {
     GeneratorState generator_state;
-    GeneratorModel generator_model;
-
     generator_state.time = time;
-    generator_state.rotation_speed = ((2*PI)/60)*((payload[1] << 8) | payload[0]); // convert rpm to rad/s
-    generator_state.start_battery_voltage = (payload[3] << 8) | payload[2];
-    generator_state.alarms = (payload[5] << 8) | payload[4];
-    generator_state.start_signals = payload[5];
+    generator_state.rpm = (payload[1] << 8) | payload[0];
+    generator_state.udc_start_battery = (payload[3] << 8) | payload[2];
+    generator_state.status = (payload[6] << 16) | (payload[5] << 8) | payload[4];
     if (payload[7] < 0x0E){
         generator_state.generator_status = static_cast<GeneratorStatus>(payload[7]);
     }
     else{
         generator_state.generator_status = STATUS_UNKNOWN;
     }
+    generator_state.generator_type = payload[8];
 
-    generator_model.model_detection = payload[6];
-    generator_model.generator_type = payload[8];
-
-    return std::make_pair(generator_state, generator_model);
+    return generator_state;
 }
 
-RunTimeState VariableSpeedMaster::parseRunTimeState(std::vector<uint8_t> payload, base::Time const& time)
+RuntimeState VariableSpeedMaster::parseRuntimeState(std::vector<uint8_t> payload, base::Time const& time)
 {
-    RunTimeState run_time_state;
-
-    run_time_state.time = time;
-
+    RuntimeState runtime_state;
+    runtime_state.time = time;
     int minutes = payload[0];
     int hours = (payload[3] << 16) | (payload[2] << 8) | payload[1];
-    run_time_state.total_run_time = base::Time::fromSeconds((hours * 60 * 60) + (minutes * 60));
-
+    runtime_state.total_runtime = base::Time::fromSeconds((hours * 60 * 60) + (minutes * 60));
     minutes = payload[4];
     hours = (payload[7] << 16) | (payload[6] << 8) | payload[5];
-    run_time_state.historical_run_time = base::Time::fromSeconds((hours * 60 * 60) + (minutes * 60));
-
-    return run_time_state;
+    runtime_state.historical_runtime = base::Time::fromSeconds((hours * 60 * 60) + (minutes * 60));
+    return runtime_state;
 }

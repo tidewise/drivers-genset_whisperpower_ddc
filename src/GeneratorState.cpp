@@ -33,26 +33,34 @@ std::string statusToString(GeneratorStatus status) {
 
 std::ostream& genset_whisperpower_ddc::operator << (std::ostream& io, GeneratorState const& state) {
     io << "Time: " << state.time << "\n";
-    io << "Rotation speed: " << std::dec << state.rotation_speed << "rad/s\n";
-    io << "Start battery voltage: " << std::dec << state.start_battery_voltage * 0.01 << " V\n";
+    io << "RPM: " << std::dec << state.rpm << "\n";
+    io << "Udc start battery: " << std::dec << state.udc_start_battery * 0.01 << " V" << "\n";
 
+    io << "Status flags:\n";
     io << "  Alarms:\n";
-    FLAG_OUT(state.alarms, OVERALL_ALARM);
-    FLAG_OUT(state.alarms, ENGINE_TEMPERATURE_ALARM);
-    FLAG_OUT(state.alarms, PM_VOLTAGE_ALARM);
-    FLAG_OUT(state.alarms, OIL_PRESSURE_ALARM);
-    FLAG_OUT(state.alarms, EXHAUST_TEMPERATURE_ALARM);
-    FLAG_OUT(state.alarms, UAC1_ALARM);
-    FLAG_OUT(state.alarms, IAC1_ALARM);
-    FLAG_OUT(state.alarms, OIL_PRESSURE_HIGH_ALARM);
-    FLAG_OUT(state.alarms, LOW_START_BATTERY_VOLTAGE_ALARM);
-    FLAG_OUT(state.alarms, START_FAILURE);
+    FLAG_OUT(state.status, OVERALL_ALARM);
+    FLAG_OUT(state.status, ENGINE_TEMPERATURE_ALARM);
+    FLAG_OUT(state.status, PM_VOLTAGE_ALARM);
+    FLAG_OUT(state.status, OIL_PRESSURE_ALARM);
+    FLAG_OUT(state.status, EXHAUST_TEMPERATURE_ALARM);
+    FLAG_OUT(state.status, UAC1_ALARM);
+    FLAG_OUT(state.status, IAC1_ALARM);
+    FLAG_OUT(state.status, OIL_PRESSURE_HIGH_ALARM);
+    FLAG_OUT(state.status, LOW_START_BATTERY_VOLTAGE_ALARM);
 
-    io << "  Start signals:\n";
-    FLAG_OUT(state.start_signals, RUN_SIGNAL);
-    FLAG_OUT(state.start_signals, START_BY_OPERATION_UNIT);
+    io << "  Model detection:\n";
+    FLAG_OUT(state.status, MODEL_DETECTION_50HZ);
+    FLAG_OUT(state.status, MODEL_DETECTION_60HZ);
+    FLAG_OUT(state.status, MODEL_DETECTION_3_PHASE);
+    FLAG_OUT(state.status, MODEL_DETECTION_MOBILE);
+
+    io << "  Others:\n";
+    FLAG_OUT(state.status, START_FAILURE);
+    FLAG_OUT(state.status, RUN_SIGNAL);
+    FLAG_OUT(state.status, START_BY_OPERATION_UNIT);
 
     io << "generator status: " << statusToString(state.generator_status)  << "\n";
+    io << "generator type: " << std::dec << state.generator_type;
 
     return io;
 }
