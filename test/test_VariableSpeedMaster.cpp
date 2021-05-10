@@ -6,6 +6,8 @@
 #include <fcntl.h>
 #include <thread>
 
+#define PI 3.141592653589793
+
 using namespace std;
 using namespace genset_whisperpower_ddc;
 using testing::ElementsAreArray;
@@ -45,11 +47,11 @@ TEST_F(VariableSpeedMasterTest, it_reads_a_frame) {
 TEST_F(VariableSpeedMasterTest, it_writes_a_frame) {
     driver.openURI("test://");
 
-    driver.writeFrame(0xF7, std::vector<uint8_t> {0, 1, 2, 3});
+    driver.writeFrame(variable_speed::PACKET_START_STOP, std::vector<uint8_t> {0, 1, 2, 3});
     auto bytes = readDataFromDriver();
 
     uint8_t expected[] = { variable_speed::TARGET_ADDRESS & 0xFF, (variable_speed::TARGET_ADDRESS >> 8) & 0xFF, variable_speed::SOURCE_ADDRESS & 0xFF,
-                           (variable_speed::SOURCE_ADDRESS >> 8) & 0xFF, 0xF7, 0x00, 0x01, 0x02, 0x03, 0x06 };
+                           (variable_speed::SOURCE_ADDRESS >> 8) & 0xFF, variable_speed::PACKET_START_STOP, 0x00, 0x01, 0x02, 0x03, 0x06 };
     ASSERT_THAT(bytes, ElementsAreArray(expected));
 }
 
@@ -61,7 +63,7 @@ TEST_F(VariableSpeedMasterTest, it_sends_control_command) {
     auto bytes = readDataFromDriver();
 
     uint8_t expected[] = { variable_speed::TARGET_ADDRESS & 0xFF, (variable_speed::TARGET_ADDRESS >> 8) & 0xFF, variable_speed::SOURCE_ADDRESS & 0xFF,
-                           (variable_speed::SOURCE_ADDRESS >> 8) & 0xFF, 0xF7, 0x02, 0x00, 0x00, 0x00, 0x02 };
+                           (variable_speed::SOURCE_ADDRESS >> 8) & 0xFF, variable_speed::PACKET_START_STOP, 0x02, 0x00, 0x00, 0x00, 0x02 };
      ASSERT_THAT(bytes, ElementsAreArray(expected));
 }
 
@@ -77,25 +79,32 @@ TEST_F(VariableSpeedMasterTest, it_parses_generator_state) {
     ASSERT_EQ(0x02, frame.command);
 
     Time now = Time::now();
-    GeneratorState generatorState = driver.parseGeneratorState(frame.payload, now);
+    std::pair<GeneratorState, GeneratorModel> generatorStateAndModel = driver.parseGeneratorStateAndModel(frame.payload, now);
 
     GeneratorState expectedState;
     expectedState.time = now;
-    expectedState.rpm = 0x0100;
-    expectedState.udc_start_battery = 0x0302;
-    expectedState.status = 0x060504;
+    expectedState.rotation_speed = ((2*PI)/60)*0x0100;
+    expectedState.start_battery_voltage = 0x0302;
+    expectedState.alarms = 0x0504;
+    expectedState.start_signals = 0x05;
     expectedState.generator_status = GeneratorStatus::STATUS_PRESENT;
-    expectedState.generator_type = 0x08;
 
-    ASSERT_EQ(generatorState.time, expectedState.time);
-    ASSERT_EQ(generatorState.rpm, expectedState.rpm);
-    ASSERT_EQ(generatorState.udc_start_battery, expectedState.udc_start_battery);
-    ASSERT_EQ(generatorState.status, expectedState.status);
-    ASSERT_EQ(generatorState.generator_status, expectedState.generator_status);
-    ASSERT_EQ(generatorState.generator_type, expectedState.generator_type);
+    GeneratorModel expectedModel;
+    expectedModel.model_detection = 0x06;
+    expectedModel.generator_type = 0x08;
+
+    ASSERT_EQ(generatorStateAndModel.first.time, expectedState.time);
+    ASSERT_EQ(generatorStateAndModel.first.rotation_speed, expectedState.rotation_speed);
+    ASSERT_EQ(generatorStateAndModel.first.start_battery_voltage, expectedState.start_battery_voltage);
+    ASSERT_EQ(generatorStateAndModel.first.alarms, expectedState.alarms);
+    ASSERT_EQ(generatorStateAndModel.first.start_signals, expectedState.start_signals);
+    ASSERT_EQ(generatorStateAndModel.first.generator_status, expectedState.generator_status);
+
+    ASSERT_EQ(generatorStateAndModel.second.model_detection, expectedModel.model_detection);
+    ASSERT_EQ(generatorStateAndModel.second.generator_type, expectedModel.generator_type);
 }
 
-TEST_F(VariableSpeedMasterTest, it_parses_runtime_state) {
+TEST_F(VariableSpeedMasterTest, it_parses_run_time_state) {
     driver.openURI("test://");
 
     std::vector<uint8_t> buffer = { variable_speed::TARGET_ADDRESS & 0xFF, (variable_speed::TARGET_ADDRESS >> 8) & 0xFF, variable_speed::SOURCE_ADDRESS & 0xFF,
@@ -107,15 +116,15 @@ TEST_F(VariableSpeedMasterTest, it_parses_runtime_state) {
     ASSERT_EQ(0x0E, frame.command);
 
     Time now = Time::now();
-    RuntimeState runtimeState = driver.parseRuntimeState(frame.payload, now);
+    RunTimeState runTimeState = driver.parseRunTimeState(frame.payload, now);
 
-    RuntimeState expectedState;
+    RunTimeState expectedState;
     expectedState.time = now;
-    expectedState.total_runtime = Time::fromSeconds((0x030201 * 60 * 60) + (0x00 * 60));
-    expectedState.historical_runtime =  Time::fromSeconds((0x070605 * 60 * 60) + (0x04 * 60));
+    expectedState.total_run_time = Time::fromSeconds((0x030201 * 60 * 60) + (0x00 * 60));
+    expectedState.historical_run_time =  Time::fromSeconds((0x070605 * 60 * 60) + (0x04 * 60));
 
-    ASSERT_EQ(runtimeState.time, expectedState.time);
-    ASSERT_EQ(runtimeState.total_runtime, expectedState.total_runtime);
-    ASSERT_EQ(runtimeState.historical_runtime, expectedState.historical_runtime);
-    ASSERT_EQ(runtimeState.historical_runtime, expectedState.historical_runtime);
+    ASSERT_EQ(runTimeState.time, expectedState.time);
+    ASSERT_EQ(runTimeState.total_run_time, expectedState.total_run_time);
+    ASSERT_EQ(runTimeState.historical_run_time, expectedState.historical_run_time);
+    ASSERT_EQ(runTimeState.historical_run_time, expectedState.historical_run_time);
 }

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <list>
 #include <memory>
+#include <genset_whisperpower_ddc/VariableSpeed.hpp>
 #include <genset_whisperpower_ddc/VariableSpeedMaster.hpp>
 #include <genset_whisperpower_ddc/ControlCommand.hpp>
 
@@ -82,25 +83,26 @@ int main(int argc, char** argv)
         auto now = base::Time::now();
         Frame frame = master->readFrame();
 
-        if (frame.targetID != 0x0081) {
+        if (frame.targetID != variable_speed::TARGET_ADDRESS) {
             cerr << "unknown target ID '0x" <<  std::hex << (uint16_t) frame.targetID << "'\n\n";
             return 1;
         }
 
-        if (frame.sourceID != 0x0088) {
+        if (frame.sourceID != variable_speed::SOURCE_ADDRESS) {
             cerr << "unknown source ID '0x" <<  std::hex << (uint16_t) frame.sourceID << "'\n\n";
             return 1;
         }
 
-        if (frame.command == 2){
-            GeneratorState generatorState = master->parseGeneratorState(frame.payload, now);
+        if (frame.command == variable_speed::PACKET_GENERATOR_STATE_AND_MODEL){
+            std::pair<GeneratorState, GeneratorModel> generatorStateAndModel = master->parseGeneratorStateAndModel(frame.payload, now);
 
-            cout << generatorState << endl;
+            cout << generatorStateAndModel.first << endl;
+            cout << generatorStateAndModel.second << endl;
         }
-        else if (frame.command == 14) {
-            RuntimeState runtimeState = master->parseRuntimeState(frame.payload, now);
+        else if (frame.command == variable_speed::PACKET_RUN_TIME_STATE) {
+            RunTimeState runTimeState = master->parseRunTimeState(frame.payload, now);
 
-            cout << runtimeState << endl;
+            cout << runTimeState << endl;
         }
         else {
             cerr << "unknown command '0x" <<  std::hex << (uint16_t) frame.command << "'\n\n";

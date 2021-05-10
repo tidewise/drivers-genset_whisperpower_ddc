@@ -33,6 +33,15 @@ namespace genset_whisperpower_ddc {
         /** Number of bytes in a frame header */
         static const int FRAME_HEADER_SIZE = 5;
 
+        /** Known Frame.command value for frame identification and correct parsing */
+        static const int PACKET_GENERATOR_STATE_AND_MODEL = 0x02;
+
+        /** Known Frame.command value for frame identification and correct parsing */
+        static const int PACKET_RUN_TIME_STATE = 0x0E;
+
+        /** Known Frame.command value for frame formatting */
+        static const int PACKET_START_STOP = 0xF7;
+
         /** @overload
          */
         uint8_t* formatFrame(uint8_t* buffer, uint16_t targetID, uint16_t sourceID, uint8_t command,
@@ -78,9 +87,9 @@ namespace genset_whisperpower_ddc {
          */
         bool isChecksumValid(uint8_t const* start, uint8_t const* end);
 
-        /** Format payload for command F7
+        /** Format payload for StartStop command
          */
-        std::vector<uint8_t> formatCommandF7Data(uint8_t controlCommand);
+        std::vector<uint8_t> formatStartStopCommandData(uint8_t controlCommand);
     }
 
 }
