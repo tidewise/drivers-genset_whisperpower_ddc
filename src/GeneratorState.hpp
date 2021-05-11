@@ -9,7 +9,7 @@ namespace genset_whisperpower_ddc {
         base::Time time;
 
         float rotation_speed;
-        int start_battery_voltage;
+        float start_battery_voltage;
 
         enum Alarms {
             OVERALL_ALARM = 0x01,

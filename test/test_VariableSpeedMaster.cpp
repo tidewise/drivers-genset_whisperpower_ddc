@@ -33,13 +33,13 @@ TEST_F(VariableSpeedMasterTest, it_reads_a_frame) {
     driver.openURI("test://");
 
     std::vector<uint8_t> buffer = { variable_speed::TARGET_ADDRESS & 0xFF, (variable_speed::TARGET_ADDRESS >> 8) & 0xFF, variable_speed::SOURCE_ADDRESS & 0xFF,
-                           (variable_speed::SOURCE_ADDRESS >> 8) & 0xFF, 0x02, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0x38 };
+                           (variable_speed::SOURCE_ADDRESS >> 8) & 0xFF, variable_speed::PACKET_GENERATOR_STATE_AND_MODEL, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0x38 };
     pushDataToDriver(&buffer[0], &buffer[16]);
 
     Frame frame = driver.readFrame();
     ASSERT_EQ(variable_speed::TARGET_ADDRESS, frame.targetID);
     ASSERT_EQ(variable_speed::SOURCE_ADDRESS, frame.sourceID);
-    ASSERT_EQ(0x02, frame.command);
+    ASSERT_EQ(variable_speed::PACKET_GENERATOR_STATE_AND_MODEL, frame.command);
     uint8_t payload[10] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
     ASSERT_THAT(frame.payload, ElementsAreArray(payload));
 }
@@ -59,32 +59,32 @@ TEST_F(VariableSpeedMasterTest, it_writes_a_frame) {
 TEST_F(VariableSpeedMasterTest, it_sends_control_command) {
     driver.openURI("test://");
 
-    driver.sendControlCommand(0x02);
+    driver.sendControlCommand(variable_speed::PACKET_GENERATOR_STATE_AND_MODEL);
     auto bytes = readDataFromDriver();
 
     uint8_t expected[] = { variable_speed::TARGET_ADDRESS & 0xFF, (variable_speed::TARGET_ADDRESS >> 8) & 0xFF, variable_speed::SOURCE_ADDRESS & 0xFF,
-                           (variable_speed::SOURCE_ADDRESS >> 8) & 0xFF, variable_speed::PACKET_START_STOP, 0x02, 0x00, 0x00, 0x00, 0x02 };
+                           (variable_speed::SOURCE_ADDRESS >> 8) & 0xFF, variable_speed::PACKET_START_STOP, variable_speed::PACKET_GENERATOR_STATE_AND_MODEL, 0x00, 0x00, 0x00, 0x02 };
      ASSERT_THAT(bytes, ElementsAreArray(expected));
 }
 
-TEST_F(VariableSpeedMasterTest, it_parses_generator_state) {
+TEST_F(VariableSpeedMasterTest, it_parses_generator_state_and_model) {
     driver.openURI("test://");
 
     std::vector<uint8_t> buffer = { variable_speed::TARGET_ADDRESS & 0xFF, (variable_speed::TARGET_ADDRESS >> 8) & 0xFF, variable_speed::SOURCE_ADDRESS & 0xFF,
-                           (variable_speed::SOURCE_ADDRESS >> 8) & 0xFF, 0x02, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0x38 };
+                           (variable_speed::SOURCE_ADDRESS >> 8) & 0xFF, variable_speed::PACKET_GENERATOR_STATE_AND_MODEL, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0x38 };
     pushDataToDriver(&buffer[0], &buffer[16]);
 
     Frame frame = driver.readFrame();
 
-    ASSERT_EQ(0x02, frame.command);
+    ASSERT_EQ(variable_speed::PACKET_GENERATOR_STATE_AND_MODEL, frame.command);
 
     Time now = Time::now();
     std::pair<GeneratorState, GeneratorModel> generatorStateAndModel = driver.parseGeneratorStateAndModel(frame.payload, now);
 
     GeneratorState expectedState;
     expectedState.time = now;
-    expectedState.rotation_speed = ((2*PI)/60)*0x0100;
-    expectedState.start_battery_voltage = 0x0302;
+    expectedState.rotation_speed = ((2*PI)/60) * 0x0100;
+    expectedState.start_battery_voltage = 0.01 * 0x0302;
     expectedState.alarms = 0x0504;
     expectedState.start_signals = 0x05;
     expectedState.generator_status = GeneratorStatus::STATUS_PRESENT;
@@ -108,12 +108,12 @@ TEST_F(VariableSpeedMasterTest, it_parses_run_time_state) {
     driver.openURI("test://");
 
     std::vector<uint8_t> buffer = { variable_speed::TARGET_ADDRESS & 0xFF, (variable_speed::TARGET_ADDRESS >> 8) & 0xFF, variable_speed::SOURCE_ADDRESS & 0xFF,
-                           (variable_speed::SOURCE_ADDRESS >> 8) & 0xFF, 0x0E, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0x44 };
+                           (variable_speed::SOURCE_ADDRESS >> 8) & 0xFF, variable_speed::PACKET_RUN_TIME_STATE, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0x44 };
     pushDataToDriver(&buffer[0], &buffer[16]);
 
     Frame frame = driver.readFrame();
 
-    ASSERT_EQ(0x0E, frame.command);
+    ASSERT_EQ(variable_speed::PACKET_RUN_TIME_STATE, frame.command);
 
     Time now = Time::now();
     RunTimeState runTimeState = driver.parseRunTimeState(frame.payload, now);

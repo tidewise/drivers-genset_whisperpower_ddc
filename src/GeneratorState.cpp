@@ -34,7 +34,7 @@ std::string statusToString(GeneratorStatus status) {
 std::ostream& genset_whisperpower_ddc::operator << (std::ostream& io, GeneratorState const& state) {
     io << "Time: " << state.time << "\n";
     io << "Rotation speed: " << std::dec << state.rotation_speed << "rad/s\n";
-    io << "Start battery voltage: " << std::dec << state.start_battery_voltage * 0.01 << " V\n";
+    io << "Start battery voltage: " << std::dec << state.start_battery_voltage << " V\n";
 
     io << "  Alarms:\n";
     FLAG_OUT(state.alarms, OVERALL_ALARM);

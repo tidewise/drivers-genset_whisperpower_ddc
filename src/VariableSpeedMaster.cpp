@@ -49,7 +49,7 @@ std::pair<GeneratorState, GeneratorModel> VariableSpeedMaster::parseGeneratorSta
 
     generator_state.time = time;
     generator_state.rotation_speed = ((2*PI)/60)*((payload[1] << 8) | payload[0]); // convert rpm to rad/s
-    generator_state.start_battery_voltage = (payload[3] << 8) | payload[2];
+    generator_state.start_battery_voltage = 0.01 * ((payload[3] << 8) | payload[2]);
     generator_state.alarms = (payload[5] << 8) | payload[4];
     generator_state.start_signals = payload[5];
     if (payload[7] < 0x0E){
