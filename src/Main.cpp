@@ -81,7 +81,22 @@ int main(int argc, char** argv)
         }
 
         auto now = base::Time::now();
-        Frame frame = master->readFrame();
+
+        Frame frame;
+        try
+        {
+            frame = master->readFrame();
+        }
+        catch(const variable_speed::WrongSize& e)
+        {
+            cerr << e.what() << "\n";
+            return 1;
+        }
+        catch(const variable_speed::InvalidChecksum& e)
+        {
+            cerr << e.what() << "\n";
+            return 1;
+        }
 
         if (frame.targetID != variable_speed::TARGET_ADDRESS) {
             cerr << "unknown target ID '0x" <<  std::hex << (uint16_t) frame.targetID << "'\n\n";
