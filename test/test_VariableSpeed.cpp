@@ -22,7 +22,7 @@ TEST_F(VariableSpeedTest, it_computes_the_checksum) {
 TEST_F(VariableSpeedTest, it_formats_a_frame) {
     uint8_t buffer[10];
     uint8_t payload[4] = { 0, 1, 2, 3 };
-    uint8_t* bufferEnd = variable_speed::formatFrame(buffer, variable_speed::TARGET_ADDRESS, variable_speed::SOURCE_ADDRESS, 0xF7, payload, payload + 4);
+    uint8_t* bufferEnd = variable_speed::formatFrame(buffer, variable_speed::TARGET_ADDRESS, variable_speed::SOURCE_ADDRESS, variable_speed::PACKET_START_STOP, payload, payload + 4);
     ASSERT_EQ(10, bufferEnd - buffer);
 
     /** checksum: 
@@ -32,7 +32,7 @@ TEST_F(VariableSpeedTest, it_formats_a_frame) {
      * checksum = LSB(0x81 + 0x00 + 0x88 + 0x00 + 0x0F7 + 0X00 + 0x01 + 0x02 + 0x03) = LSB(0x206) = 0x06
      */
     uint8_t expected[] = { variable_speed::TARGET_ADDRESS & 0xFF, (variable_speed::TARGET_ADDRESS >> 8) & 0xFF, variable_speed::SOURCE_ADDRESS & 0xFF,
-                           (variable_speed::SOURCE_ADDRESS >> 8) & 0xFF, 0xF7, 0, 1, 2, 3, 0x06 };
+                           (variable_speed::SOURCE_ADDRESS >> 8) & 0xFF, variable_speed::PACKET_START_STOP, 0, 1, 2, 3, 0x06 };
     ASSERT_THAT(std::vector<uint8_t>(buffer, bufferEnd),
                 ElementsAreArray(expected));
 }
@@ -40,7 +40,7 @@ TEST_F(VariableSpeedTest, it_formats_a_frame) {
 TEST_F(VariableSpeedTest, it_throws_if_the_resulting_frame_size_would_be_different_from_10_bytes) {
     uint8_t buffer[0];
     ASSERT_THROW(variable_speed::formatFrame(nullptr, variable_speed::TARGET_ADDRESS,
-                 variable_speed::SOURCE_ADDRESS, 0xF7, buffer, buffer + 11),
+                 variable_speed::SOURCE_ADDRESS, variable_speed::PACKET_START_STOP, buffer, buffer + 11),
                  std::invalid_argument);
 }
 
