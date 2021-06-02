@@ -18,7 +18,7 @@ std::ostream& genset_whisperpower_ddc::operator << (std::ostream& io, GeneratorM
     FLAG_OUT(model.model_detection, MODEL_DETECTION_3_PHASE);
     FLAG_OUT(model.model_detection, MODEL_DETECTION_MOBILE);
 
-    io << "generator type: " << std::dec << model.generator_type;
+    io << "generator type: " << std::dec << model.generator_type << "\n";
 
     return io;
 }

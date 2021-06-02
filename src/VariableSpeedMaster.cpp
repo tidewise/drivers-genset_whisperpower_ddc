@@ -33,7 +33,7 @@ void VariableSpeedMaster::readFrame(Frame& frame) {
 
 void VariableSpeedMaster::writeFrame(uint8_t command, std::vector<uint8_t> const& payload) {
     uint8_t* start = &m_write_buffer[0];
-    uint8_t const* end = variable_speed::formatFrame(start, variable_speed::TARGET_ADDRESS, variable_speed::SOURCE_ADDRESS, command, payload);
+    uint8_t const* end = variable_speed::formatFrame(start, variable_speed::DDC_CONTROLLER_ADDRESS, variable_speed::PANELS_ADDRESS, command, payload);
     writePacket(&m_write_buffer[0], end - start);
 }
 
@@ -59,6 +59,7 @@ std::pair<GeneratorState, GeneratorModel> VariableSpeedMaster::parseGeneratorSta
         generator_state.generator_status = STATUS_UNKNOWN;
     }
 
+    generator_model.time = time;
     generator_model.model_detection = payload[6];
     generator_model.generator_type = payload[8];
 
