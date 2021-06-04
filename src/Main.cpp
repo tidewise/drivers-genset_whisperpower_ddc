@@ -29,10 +29,10 @@ void handler(int s) {
 
 void getValidFrame(std::unique_ptr<VariableSpeedMaster> &master) {
     Frame frame;
-    bool validFrame;
-    bool receivedGeneratorState = false;
-    bool receivedRunTimeState = false;
-    while (!(receivedGeneratorState || receivedRunTimeState)) {
+    bool validFrame = false;
+    bool receivedValidFrame = false;
+
+    while (!receivedValidFrame) {
         try {
             frame = master->readFrame();
             validFrame = true;
@@ -43,16 +43,14 @@ void getValidFrame(std::unique_ptr<VariableSpeedMaster> &master) {
         catch(const variable_speed::InvalidChecksum& e) {
             validFrame = false;
         }
-        catch(const iodrivers_base::UnixError& e) {} // iodrivers_base may throw this error when receiving a SIGINT, but it can be ignored
+        // iodrivers_base may throw this error when receiving a SIGINT, but it can be ignored
+        catch(const iodrivers_base::UnixError& e) {
+            validFrame = false;
+        }
 
         if (validFrame) {
             if (frame.targetID == variable_speed::PANELS_ADDRESS && frame.sourceID == variable_speed::DDC_CONTROLLER_ADDRESS) {
-                if (frame.command == variable_speed::PACKET_GENERATOR_STATE_AND_MODEL){
-                    receivedGeneratorState = true;
-                }
-                else if (frame.command == variable_speed::PACKET_RUN_TIME_STATE) {
-                    receivedRunTimeState = true;
-                }
+                receivedValidFrame = true;
             }
         }
     }
