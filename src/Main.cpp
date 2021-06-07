@@ -27,7 +27,7 @@ void handler(int s) {
     stop = true;
 }
 
-void getValidFrame(std::unique_ptr<VariableSpeedMaster> &master) {
+Frame waitForValidFrame(std::unique_ptr<VariableSpeedMaster> &master) {
     Frame frame;
     bool validFrame = false;
     bool receivedValidFrame = false;
@@ -54,6 +54,7 @@ void getValidFrame(std::unique_ptr<VariableSpeedMaster> &master) {
             }
         }
     }
+    return frame;
 }
 
 int main(int argc, char** argv) {
@@ -84,7 +85,7 @@ int main(int argc, char** argv) {
             return 1;
         }
 
-        getValidFrame(master);
+        waitForValidFrame(master);
 
         master->sendControlCommand(CONTROL_CMD_START);
 
@@ -92,7 +93,7 @@ int main(int argc, char** argv) {
 
         // Send keep_alive until user presses Ctrl+C
         while(!stop) {
-            getValidFrame(master);
+            waitForValidFrame(master);
 
             try {
                 master->sendControlCommand(CONTROL_CMD_KEEP_ALIVE);
@@ -100,7 +101,7 @@ int main(int argc, char** argv) {
             catch(const iodrivers_base::UnixError& e) {} // iodrivers_base may throw this error when receiving a SIGINT, but it can be ignored
         }
 
-        getValidFrame(master);
+        waitForValidFrame(master);
 
         master->sendControlCommand(CONTROL_CMD_STOP);
     }
@@ -111,37 +112,24 @@ int main(int argc, char** argv) {
                 return 1;
         }
 
-        base::Time now;
-
         Frame frame;
-        bool validFrame;
+        base::Time now;
         std::pair<GeneratorState, GeneratorModel> generatorStateAndModel;
         RunTimeState runTimeState;
         bool receivedGeneratorState = false;
         bool receivedRunTimeState = false;
+
         while (!(receivedGeneratorState && receivedRunTimeState)) {
-            try {
-                frame = master->readFrame();
-                validFrame = true;
+            frame = waitForValidFrame(master);
+
+            now = base::Time::now();
+            if (frame.command == variable_speed::PACKET_GENERATOR_STATE_AND_MODEL){
+                generatorStateAndModel = master->parseGeneratorStateAndModel(frame.payload, now);
+                receivedGeneratorState = true;
             }
-            catch(const variable_speed::WrongSize& e) {
-                validFrame = false;
-            }
-            catch(const variable_speed::InvalidChecksum& e) {
-                validFrame = false;
-            }
-            if (validFrame) {
-                if (frame.targetID == variable_speed::PANELS_ADDRESS && frame.sourceID == variable_speed::DDC_CONTROLLER_ADDRESS) {
-                    now = base::Time::now();
-                    if (frame.command == variable_speed::PACKET_GENERATOR_STATE_AND_MODEL){
-                        generatorStateAndModel = master->parseGeneratorStateAndModel(frame.payload, now);
-                        receivedGeneratorState = true;
-                    }
-                    else if (frame.command == variable_speed::PACKET_RUN_TIME_STATE) {
-                        runTimeState = master->parseRunTimeState(frame.payload, now);
-                        receivedRunTimeState = true;
-                    }
-                }
+            else if (frame.command == variable_speed::PACKET_RUN_TIME_STATE) {
+                runTimeState = master->parseRunTimeState(frame.payload, now);
+                receivedRunTimeState = true;
             }
         }
 
