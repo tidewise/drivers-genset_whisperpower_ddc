@@ -28,33 +28,19 @@ void handler(int s) {
 }
 
 Frame waitForValidFrame(std::unique_ptr<VariableSpeedMaster> &master) {
-    Frame frame;
-    bool validFrame = false;
-    bool receivedValidFrame = false;
-
-    while (!receivedValidFrame) {
+    while (true) {
         try {
-            frame = master->readFrame();
-            validFrame = true;
-        }
-        catch(const variable_speed::WrongSize& e) {
-            validFrame = false;
-        }
-        catch(const variable_speed::InvalidChecksum& e) {
-            validFrame = false;
-        }
-        // iodrivers_base may throw this error when receiving a SIGINT, but it can be ignored
-        catch(const iodrivers_base::UnixError& e) {
-            validFrame = false;
-        }
-
-        if (validFrame) {
+            Frame frame = master->readFrame();
             if (frame.targetID == variable_speed::PANELS_ADDRESS && frame.sourceID == variable_speed::DDC_CONTROLLER_ADDRESS) {
-                receivedValidFrame = true;
+                return frame;
             }
         }
+        catch(const variable_speed::WrongSize& e) {}
+        catch(const variable_speed::InvalidChecksum& e) {}
+        // iodrivers_base may throw this error when receiving a SIGINT, but it can be ignored
+        catch(const iodrivers_base::UnixError& e) {}
     }
-    return frame;
+    // Never reached
 }
 
 int main(int argc, char** argv) {
