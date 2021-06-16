@@ -12,11 +12,11 @@ namespace genset_whisperpower_ddc {
     namespace variable_speed {
         /** Address for the monitor panel
          */
-        static const int TARGET_ADDRESS = 0x0081;
+        static const int PANELS_ADDRESS = 0x0081;
         
         /** Address for the DDC power controller
          */
-        static const int SOURCE_ADDRESS = 0x0088;
+        static const int DDC_CONTROLLER_ADDRESS = 0x0088;
 
         /** Total frame size of sent packet
          */
