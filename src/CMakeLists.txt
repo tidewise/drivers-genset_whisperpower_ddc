@@ -1,6 +1,6 @@
 rock_library(genset_whisperpower_ddc
     SOURCES VariableSpeed.cpp VariableSpeedMaster.cpp GeneratorState.cpp GeneratorModel.cpp RunTimeState.cpp ExportParameters.cpp
-    HEADERS VariableSpeed.hpp VariableSpeedMaster.hpp Frame.hpp GeneratorStatus.hpp ControlCommand.hpp GeneratorState.hpp GeneratorModel.hpp RunTimeState.hpp ExportParameters.hpp
+    HEADERS VariableSpeed.hpp VariableSpeedMaster.hpp Frame.hpp GeneratorStatus.hpp ControlCommand.hpp GeneratorState.hpp GeneratorModel.hpp RunTimeState.hpp
     DEPS_PKGCONFIG base-types iodrivers_base)
 
 rock_executable(genset_whisperpower_ddc_ctl Main.cpp

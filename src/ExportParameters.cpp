@@ -1,19 +1,16 @@
 #include <jsoncpp/json/json.h>
 #include <fstream>
-#include <genset_whisperpower_ddc/ExportParameters.hpp>
 #include <iostream>
 
 using namespace genset_whisperpower_ddc;
 
-ExportParameters::ExportParameters()
+void writeAndExportParameters(pair<GeneratorState, GeneratorModel> genset,
+    RunTimeState run_time_state)
 {
 }
 
-ExportParameters::~ExportParameters()
 {
 }
-void ExportParameters::exportParameters(pair<GeneratorState, GeneratorModel> genset,
-    RunTimeState run_time_state)
 {
     auto state = genset.first;
     auto model = genset.second;

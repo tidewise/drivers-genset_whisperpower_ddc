@@ -1,5 +1,4 @@
 #include <genset_whisperpower_ddc/ControlCommand.hpp>
-#include <genset_whisperpower_ddc/ExportParameters.hpp>
 #include <genset_whisperpower_ddc/VariableSpeed.hpp>
 #include <genset_whisperpower_ddc/VariableSpeedMaster.hpp>
 #include <iostream>
@@ -134,8 +133,6 @@ int main(int argc, char** argv)
             }
         }
 
-        std::unique_ptr<ExportParameters> file_exported(new ExportParameters());
-        file_exported->exportParameters(generatorStateAndModel, runTimeState);
         cout << generatorStateAndModel.first << endl;
         cout << generatorStateAndModel.second << endl;
         cout << runTimeState << endl;
