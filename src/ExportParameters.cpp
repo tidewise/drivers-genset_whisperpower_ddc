@@ -1,7 +1,7 @@
+#include <jsoncpp/json/json.h>
 #include <fstream>
 #include <genset_whisperpower_ddc/ExportParameters.hpp>
 #include <iostream>
-#include <json-nlohmann>
 
 using namespace genset_whisperpower_ddc;
 
@@ -15,7 +15,6 @@ ExportParameters::~ExportParameters()
 void ExportParameters::exportParameters(pair<GeneratorState, GeneratorModel> genset,
     RunTimeState run_time_state)
 {
-    nlohmann::json params;
     auto state = genset.first;
     auto model = genset.second;
     int default_space_delimited = 4;

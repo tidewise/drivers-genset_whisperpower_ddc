@@ -9,6 +9,6 @@
   <depend package="base/cmake" />
   <depend package="base/types" />
   <depend package="drivers/iodrivers_base" />
-  <depend_optional package="json-nlohmann" />
+  <depend package="jsoncpp" />
   <test_depend package="google-test" />
 </package>
