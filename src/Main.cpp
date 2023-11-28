@@ -134,6 +134,8 @@ int main(int argc, char** argv)
             }
         }
 
+        std::unique_ptr<ExportParameters> file_exported(new ExportParameters());
+        file_exported->exportParameters(generatorStateAndModel, runTimeState);
         cout << generatorStateAndModel.first << endl;
         cout << generatorStateAndModel.second << endl;
         cout << runTimeState << endl;
