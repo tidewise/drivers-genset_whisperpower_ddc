@@ -1,7 +1,9 @@
+#include <fstream>
 #include <genset_whisperpower_ddc/ControlCommand.hpp>
 #include <genset_whisperpower_ddc/VariableSpeed.hpp>
 #include <genset_whisperpower_ddc/VariableSpeedMaster.hpp>
 #include <iostream>
+#include <jsoncpp/json/json.h>
 #include <list>
 #include <memory>
 #include <signal.h>
@@ -23,6 +25,7 @@ void usage(ostream& stream)
            << "repeatedly sending the keep_alive command until the user press any key. "
               "When this happens, send the stop command to stop de generator.\n"
            << "    read_frame: read a frame and print its content\n"
+           << "    speed-info: export parameters in a json file.\n"
            << endl;
 }
 
@@ -31,7 +34,7 @@ void handler(int s)
     stop = true;
 }
 
-Frame waitForValidFrame(std::unique_ptr<VariableSpeedMaster>& master)
+Frame waitForValidFrame(unique_ptr<VariableSpeedMaster>& master)
 {
     while (true) {
         try {
@@ -53,6 +56,20 @@ Frame waitForValidFrame(std::unique_ptr<VariableSpeedMaster>& master)
     // Never reached
 }
 
+void writeAndExportParameters(GeneratorState genset_state)
+{
+    Json::Value params;
+
+    params["state"]["rotation speed"] = genset_state.rotation_speed;
+    params["state"]["time"] = (int)genset_state.time.toMilliseconds();
+    ;
+
+    fstream file("genset_parameters.json");
+    Json::StreamWriterBuilder builder;
+    unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
+    writer->write(params, &file);
+}
+
 int main(int argc, char** argv)
 {
     list<string> args(argv + 1, argv + argc);
@@ -72,7 +89,7 @@ int main(int argc, char** argv)
     string cmd = args.front();
     args.pop_front();
 
-    std::unique_ptr<VariableSpeedMaster> master(new VariableSpeedMaster());
+    unique_ptr<VariableSpeedMaster> master(new VariableSpeedMaster());
     master->openURI(uri);
 
     if (cmd == "run") {
@@ -113,7 +130,7 @@ int main(int argc, char** argv)
 
         Frame frame;
         base::Time now;
-        std::pair<GeneratorState, GeneratorModel> generatorStateAndModel;
+        pair<GeneratorState, GeneratorModel> generatorStateAndModel;
         RunTimeState runTimeState;
         bool receivedGeneratorState = false;
         bool receivedRunTimeState = false;
@@ -137,6 +154,38 @@ int main(int argc, char** argv)
         cout << generatorStateAndModel.second << endl;
         cout << runTimeState << endl;
     }
+    else if ("speed-info") {
+        if (args.size() != 0) {
+            cerr << "command speed-info does not accept arguments\n\n";
+            usage(cerr);
+            return 1;
+        }
+
+        Frame frame;
+        base::Time now;
+        pair<GeneratorState, GeneratorModel> generatorStateAndModel;
+        RunTimeState runTimeState;
+        bool receivedGeneratorState = false;
+        bool receivedRunTimeState = false;
+
+        while (!(receivedGeneratorState && receivedRunTimeState)) {
+            frame = waitForValidFrame(master);
+
+            now = base::Time::now();
+            if (frame.command == variable_speed::PACKET_GENERATOR_STATE_AND_MODEL) {
+                generatorStateAndModel =
+                    master->parseGeneratorStateAndModel(frame.payload, now);
+                receivedGeneratorState = true;
+            }
+            else if (frame.command == variable_speed::PACKET_RUN_TIME_STATE) {
+                runTimeState = master->parseRunTimeState(frame.payload, now);
+                receivedRunTimeState = true;
+            }
+        }
+
+        writeAndExportParameters(generatorStateAndModel.first);
+    }
+
     else {
         cerr << "unknown command '" << cmd << "'\n\n";
         usage(cerr);
