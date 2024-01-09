@@ -2,6 +2,7 @@
 #define _GENSET_WHISPERPOWER_DDC_VARIABLE_SPEED_HPP_
 
 #include <array>
+#include <stdexcept>
 
 #include <genset_whisperpower_ddc/Frame.hpp>
 

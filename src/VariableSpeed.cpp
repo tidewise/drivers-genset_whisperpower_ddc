@@ -1,5 +1,6 @@
 #include <genset_whisperpower_ddc/VariableSpeed.hpp>
 #include <cstring>
+#include <string>
 
 using namespace std;
 using namespace genset_whisperpower_ddc;
