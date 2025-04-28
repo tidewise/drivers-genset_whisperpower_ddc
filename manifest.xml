@@ -1,6 +1,6 @@
 <package>
   <description brief="Implementation of protocol(s) for the WhisperPower genset">
-  
+
   </description>
   <author>Mateus Pedrosa/mateusmacpedrosa@gmail.com</author>
   <license></license>
@@ -9,5 +9,6 @@
   <depend package="base/cmake" />
   <depend package="base/types" />
   <depend package="drivers/iodrivers_base" />
+  <depend package="drivers/power_whisperpower" />
   <test_depend package="google-test" />
 </package>
