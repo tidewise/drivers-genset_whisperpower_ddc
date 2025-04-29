@@ -2,14 +2,16 @@
 #define GENSET_WHISPERPOWER_DDC_GENERATOR_STATE_HPP
 
 #include <base/Time.hpp>
+#include <base/Float.hpp>
+#include <power_whisperpower/GensetState.hpp>
 #include <genset_whisperpower_ddc/GeneratorStatus.hpp>
 
 namespace genset_whisperpower_ddc {
     struct GeneratorState {
         base::Time time;
 
-        float rotation_speed;
-        float start_battery_voltage;
+        float rotation_speed = base::unknown<float>();
+        float start_battery_voltage = base::unknown<float>();
 
         enum Alarms {
             OVERALL_ALARM = 0x01,
@@ -35,7 +37,9 @@ namespace genset_whisperpower_ddc {
         /** @meta bitfield /genset_whisperpower_ddc/GeneratorState/StartSignals */
         uint8_t start_signals = 0;
 
-        GeneratorStatus generator_status;
+        GeneratorStatus generator_status = STATUS_UNKNOWN;
+
+        power_whisperpower::GensetState toGensetState() const;
     };
 
     std::ostream& operator << (std::ostream& io, GeneratorState const& state);
