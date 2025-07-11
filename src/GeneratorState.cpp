@@ -67,6 +67,7 @@ static power_whisperpower::GensetState::Stage statusToGensetState(GeneratorStatu
     typedef power_whisperpower::GensetState::Stage Stage;
 
     switch (status) {
+        case STATUS_FAILURE:
         case STATUS_NONE:
             return Stage::GENSET_STAGE_STOPPED;
         case STATUS_PRE_GLOW:
@@ -81,7 +82,6 @@ static power_whisperpower::GensetState::Stage statusToGensetState(GeneratorStatu
             return Stage::GENSET_STAGE_STARTING;
         case STATUS_SWITCH:
         case STATUS_STOP:
-        case STATUS_FAILURE:
             return Stage::GENSET_STAGE_STOPPING;
         case STATUS_PRESENT:
             return Stage::GENSET_STAGE_RUNNING;
